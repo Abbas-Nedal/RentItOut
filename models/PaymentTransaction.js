@@ -1,4 +1,3 @@
-// models/PaymentTransaction.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 const Rental = require('./Rental');

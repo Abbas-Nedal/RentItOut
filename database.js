@@ -1,4 +1,3 @@
-//database.js
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize('Rental', 'admin', '903911865+', {
@@ -7,6 +6,6 @@ const sequelize = new Sequelize('Rental', 'admin', '903911865+', {
     port: 3306
 });
 
-sequelize.sync(); // Sync all models with the database
+sequelize.sync(); 
 
 module.exports = sequelize;
