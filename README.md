@@ -11,7 +11,7 @@ RentItOut is a peer-to-peer rental platform that allows users to list and rent e
 
 
 ## Setup Instructions
-- Clone the repository: `git clone https://github.com/shehab-kharaz/RentItOut.git`
+- Clone the repository: `git clone https://github.com/Abbas-Nedal/RentItOut.git`
 - Install dependencies: `npm install`
 - Run the app: `npm start`
 
