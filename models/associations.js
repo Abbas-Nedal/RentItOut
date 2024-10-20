@@ -1,4 +1,3 @@
-// models/associations.js
 const User = require('./User');
 const Item = require('./Item');
 const Rental = require('./Rental');
@@ -6,7 +5,6 @@ const Logistic = require('./Logistic');
 const Review = require('./Review');
 const PaymentTransaction = require('./PaymentTransaction');
 
-// العلاقات بين الموديلات
 User.hasMany(Item, { foreignKey: 'user_id' });
 Item.belongsTo(User, { foreignKey: 'user_id' });
 

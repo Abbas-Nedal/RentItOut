@@ -1,4 +1,3 @@
-// models/Rental.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 const User = require('./User');
