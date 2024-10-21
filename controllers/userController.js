@@ -1,7 +1,7 @@
 // controllers/userController.js
 const User = require('../models/User');
 
-// جلب جميع المستخدمين
+
 exports.getUsers = async (req, res) => {
     try {
         const users = await User.findAll();
@@ -11,7 +11,7 @@ exports.getUsers = async (req, res) => {
     }
 };
 
-// جلب مستخدم واحد
+
 exports.getUserById = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
@@ -25,7 +25,7 @@ exports.getUserById = async (req, res) => {
     }
 };
 
-// إنشاء مستخدم جديد
+
 exports.createUser = async (req, res) => {
     try {
         const newUser = await User.create(req.body);
@@ -35,7 +35,7 @@ exports.createUser = async (req, res) => {
     }
 };
 
-// تحديث مستخدم
+
 exports.updateUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
@@ -50,7 +50,7 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-// حذف مستخدم
+
 exports.deleteUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
