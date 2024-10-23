@@ -1,0 +1,72 @@
+2024-10-23T17:10:03.295Z [INFO]: Server running on port 3000
+2024-10-23T17:10:08.067Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:10:08.091Z [INFO]: GET /favicon.ico - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:10:20.139Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:10:23.661Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:10:26.475Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:33:22.910Z [INFO]: Server running on port 3000
+2024-10-23T17:33:45.640Z [INFO]: GET /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:33:45.749Z [ERROR]: Failed to fetch users: res.status is not a function
+2024-10-23T17:34:09.247Z [INFO]: Server running on port 3000
+2024-10-23T17:34:12.526Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:34:19.294Z [INFO]: GET / - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:34:23.041Z [INFO]: GET /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:34:23.131Z [ERROR]: Failed to fetch users: res.status is not a function
+2024-10-23T17:36:16.631Z [INFO]: Server running on port 3000
+2024-10-23T17:36:21.556Z [INFO]: GET /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:36:51.433Z [INFO]: GET /users/1 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:36:54.458Z [INFO]: GET /users/4 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:36:59.548Z [INFO]: GET /users/2 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:37:00.684Z [INFO]: GET /users/1 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:38:27.288Z [INFO]: POST /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:38:27.290Z [ERROR]: Failed to create user: data and salt arguments required
+2024-10-23T17:39:49.566Z [INFO]: POST /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:39:49.713Z [INFO]: User johndoe@example.com created successfully
+2024-10-23T17:39:55.259Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:40:29.992Z [INFO]: POST /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:40:30.134Z [ERROR]: Failed to create user: Duplicate entry 'johndoe@example.com' for key 'users.email'
+2024-10-23T17:40:40.969Z [INFO]: POST /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:40:41.114Z [INFO]: User jsdsad@example.com created successfully
+2024-10-23T17:44:17.569Z [INFO]: POST /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:44:17.711Z [ERROR]: Failed to create user: Duplicate entry 'jsdsad@example.com' for key 'users.email'
+2024-10-23T17:46:03.250Z [INFO]: PUT /users/8 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:46:03.556Z [INFO]: User 8 updated successfully
+2024-10-23T17:46:17.888Z [INFO]: PUT /users/8 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:46:18.116Z [INFO]: User 8 updated successfully
+2024-10-23T17:46:31.642Z [INFO]: PUT /users/8 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:46:31.820Z [INFO]: User 8 updated successfully
+2024-10-23T17:48:56.070Z [INFO]: Server running on port 3000
+2024-10-23T17:49:45.641Z [INFO]: PUT /users/10 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:49:45.835Z [INFO]: User 10 updated successfully
+2024-10-23T17:50:33.643Z [INFO]: DELETE /users/10 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:50:33.830Z [INFO]: User 10 deleted successfully
+2024-10-23T17:50:50.459Z [INFO]: DELETE /users/10 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:50:56.412Z [INFO]: DELETE /users/8 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:50:56.615Z [INFO]: User 8 deleted successfully
+2024-10-23T17:51:55.633Z [INFO]: DELETE /users/8 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:52:07.872Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:52:14.581Z [INFO]: GET / - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:52:17.681Z [INFO]: GET /users - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:52:20.188Z [INFO]: GET /users/4 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:52:22.113Z [INFO]: GET /users/2 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:52:23.581Z [INFO]: GET /users/1 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:52:56.919Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-23T17:53:33.974Z [INFO]: POST /users/ - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:53:33.974Z [ERROR]: Failed to create user: data and salt arguments required
+2024-10-23T17:53:45.303Z [INFO]: POST /users/ - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:53:45.303Z [ERROR]: Failed to create user: data and salt arguments required
+2024-10-23T17:54:04.064Z [INFO]: POST /users/ - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:04.217Z [INFO]: User johndoe.com created successfully
+2024-10-23T17:54:08.061Z [INFO]: POST /users/ - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:08.206Z [INFO]: User johndoe created successfully
+2024-10-23T17:54:11.897Z [INFO]: POST /users/ - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:12.061Z [ERROR]: Failed to create user: Duplicate entry 'johndoe' for key 'users.email'
+2024-10-23T17:54:18.331Z [INFO]: POST /users/ - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:18.475Z [INFO]: User johndoei created successfully
+2024-10-23T17:54:47.815Z [INFO]: DELETE /users/12 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:47.999Z [INFO]: User 12 deleted successfully
+2024-10-23T17:54:49.906Z [INFO]: DELETE /users/13 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:50.091Z [INFO]: User 13 deleted successfully
+2024-10-23T17:54:51.767Z [INFO]: DELETE /users/15 - HTTP/1.1 - PostmanRuntime/7.37.0
+2024-10-23T17:54:51.950Z [INFO]: User 15 deleted successfully
+2024-10-23T18:00:15.259Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36

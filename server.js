@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./database');
-const logger = require('./logger'); 
+const logger = require('./config/logger')
 
 const userRoutes = require('./routes/userRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
@@ -28,6 +28,13 @@ db.getConnection()
 app.use('/users', userRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/logistics', logisticRoutes);
+
+
+
+app.get('/', (req, res) => {
+    res.send('Welcome to RentItOut API');
+});
+
 
 // Start the server
 const PORT = 3000;
