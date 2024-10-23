@@ -17,7 +17,6 @@ RentItOut is a peer-to-peer rental platform that allows users to list and rent e
 
 
 ## Technologies
-
 - **Node.js**: The runtime environment for executing JavaScript code on the server.
 - **Express.js**: A web application framework for building APIs and handling HTTP requests.
 - **MySQL**: The relational database used to store user, item, and rental data.
@@ -29,13 +28,14 @@ RentItOut is a peer-to-peer rental platform that allows users to list and rent e
 
 
 ## Project Structure
-RentItOut/
-├── controllers/            # Contains logic for handling requests 
-├── routes/                 # Contains API routes for different features 
-├── database.js             # Database connection setup (MySQL)
-├── config/                 # Contains configuration files
-│   └── logger.js           # Logging configuration with Winston
-├── logs/                   # Stores request logs
-└── server.js               # Main application entry point
+
+RentItOut/<br>
+├── controllers/    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Contains logic for handling requests<br>
+├── routes/         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Contains API routes for different features<br>
+├── database.js     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Database connection setup (MySQL)<br>
+├── config/         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Contains configuration files<br>
+├── logs-out/       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Stores request logs<br>
+└── server.js       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Main application entry point<br>
+
 
 
