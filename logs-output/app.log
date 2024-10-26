@@ -70,3 +70,25 @@
 2024-10-23T17:54:51.767Z [INFO]: DELETE /users/15 - HTTP/1.1 - PostmanRuntime/7.37.0
 2024-10-23T17:54:51.950Z [INFO]: User 15 deleted successfully
 2024-10-23T18:00:15.259Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T20:44:33.213Z [INFO]: Server running on port 3000
+2024-10-26T20:44:41.846Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T20:44:41.917Z [INFO]: GET /favicon.ico - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T20:44:46.176Z [INFO]: GET /users/ - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T21:33:15.472Z [INFO]: Server running on port 3000
+2024-10-26T21:33:23.053Z [INFO]: GET /users/ - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T21:40:17.281Z [INFO]: PUT /users/8 - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:44:45.369Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:44:58.759Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:45:58.893Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:46:43.777Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:46:53.194Z [INFO]: GET /users/ - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T21:46:55.522Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
+2024-10-26T21:50:51.268Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:52:14.979Z [INFO]: Server running on port 3000
+2024-10-26T21:52:18.720Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:54:49.838Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:55:24.077Z [INFO]: Server running on port 3000
+2024-10-26T21:55:26.672Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:56:49.542Z [INFO]: Server running on port 3000
+2024-10-26T21:56:53.342Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-26T21:57:12.028Z [INFO]: POST /users/login - HTTP/1.1 - PostmanRuntime/7.42.0
