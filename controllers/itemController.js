@@ -3,6 +3,7 @@
 /*
     This is Code responsible for managing items.
  */
+
 const db = reqiure('../database');
 const logger = require('../config/logger');
 
@@ -12,8 +13,7 @@ exports.createitem = async (req,res) => {
         const{user_id, name , description , quantity , category , price_per_day , available} = req.body;
 
         const [item]= await db.query(
-            `INSERT INTO items (user_id, name, description, quantity, category, price_per_day, available, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+            `INSERT INTO items (user_id, name, description, quantity, category, price_per_day, available, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
         [user_id, name, description, quantity, category, price_per_day, available]
     );
         logger.info(`Item ${name} create successfully`);
@@ -38,8 +38,7 @@ exports.updateItem = async (req, res) => {
         }
 
         await db.query(
-            `UPDATE items SET  user_id = ?, name = ?,  description = ?,  quantity = ?,  category = ?, price_per_day = ?, available = ?, updated_at = NOW()
- WHERE id = ?`,
+            `UPDATE items SET  user_id = ?, name = ?,  description = ?,  quantity = ?,  category = ?, price_per_day = ?, available = ?, updated_at = NOW() WHERE id = ?`,
             [
                 user_id || item[0].user_id,
                 name || item[0].name,
