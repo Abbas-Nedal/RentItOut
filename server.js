@@ -6,6 +6,7 @@ const logger = require('./config/logger')
 const userRoutes = require('./routes/userRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const logisticRoutes = require('./routes/logisticRoutes');
+const itemRoutes=require('./routes/itemRoutes');
 
 const app = express();
 app.use(bodyParser.json());
