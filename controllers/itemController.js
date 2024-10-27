@@ -99,3 +99,17 @@ exports.getItemById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch item.' });
     }
 };
+
+
+// Get all items
+exports.getAllItems = async (req, res) => {
+    try {
+        const [items] = await db.query(
+            `SELECT * FROM items`
+        );
+        res.status(200).json(items);
+    } catch (err) {
+        logger.error(`Failed to fetch items: ${err.message}`);
+        res.status(500).json({ error: 'Failed to fetch items.' });
+    }
+};
