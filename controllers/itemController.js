@@ -6,7 +6,7 @@
 const db = reqiure('../database');
 const logger = require('../config/logger');
 
-//Create new item
+// Create new item
 exports.createitem = async (req,res) => {
     try{
         const{user_id, name , description , quantity , category , price_per_day , available} = req.body;
@@ -24,7 +24,7 @@ exports.createitem = async (req,res) => {
         }
     };
 
-//update item by item_id
+// Update item by item_id
 exports.updateItem = async (req, res) => {
     try {
         const { item_id } = req.params;
@@ -57,5 +57,24 @@ exports.updateItem = async (req, res) => {
     } catch (err) {
         logger.error(`Failed to update item: ${err.message}`);
         res.status(500).json({ error: 'Failed to update item.' });
+    }
+};
+
+// Delete item by item_id
+exports.deleteItem = async (req, res) => {
+    try {
+        const { item_id } = req.params;
+        const [item] = await db.query(`SELECT * FROM items WHERE id = ?`, [item_id]);
+
+        if (item.length === 0) {
+            logger.warn(`Item with ID ${item_id} not found`);
+            return res.status(404).json({ error: 'Item not found.' });
+        }
+        await db.query(`DELETE FROM items WHERE id = ?`, [item_id]);
+        logger.info(`Item ${item_id} deleted successfully`);
+        res.status(200).json({ message: 'Item deleted successfully.' });
+    } catch (err) {
+        logger.error(`Failed to delete item: ${err.message}`);
+        res.status(500).json({ error: 'Failed to delete item.' });
     }
 };
