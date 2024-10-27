@@ -1,7 +1,10 @@
+// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./database');
-const logger = require('./config/logger')
+const logger = require('./config/logger');
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger-output.json');
 
 const userRoutes = require('./routes/userRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
@@ -25,16 +28,18 @@ db.getConnection()
     })
     .catch(err => console.error('Unable to connect to the DB:', err));
 
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
+// Define routes
 app.use('/users', userRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/logistics', logisticRoutes);
 
-
-
+// Default route
 app.get('/', (req, res) => {
     res.send('Welcome to RentItOut API');
 });
-
 
 // Start the server
 const PORT = 3000;

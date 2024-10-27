@@ -8,12 +8,15 @@ RentItOut is a peer-to-peer rental platform that allows users to list and rent e
 - User authentication and role-based access
 - Trust, safety, and verification for users
 - Delivery and pickup logistics for rented items
-
+- Automatic API documentation using Swagger
 
 ## Setup Instructions
 - Clone the repository: `git clone https://github.com/Abbas-Nedal/RentItOut.git`
 - Install dependencies: `npm install`
 - Run the app: `npm start`
+
+## Accessing API Documentation
+After starting the application, you can access the API documentation at: http://localhost:3000/api-docs
 
 
 ## Technologies
@@ -22,6 +25,7 @@ RentItOut is a peer-to-peer rental platform that allows users to list and rent e
 - **MySQL**: The relational database used to store user, item, and rental data.
 - **Winston**: A logging library used to log requests and other system events.
 - **body-parser**: Middleware for parsing incoming request bodies in JSON format.
+- **Swagger**: A tool for auto-generating API documentation and testing endpoints.
 - **RESTful API**: The architectural style used for designing the API endpoints.
 
 
@@ -35,7 +39,7 @@ RentItOut/<br>
 ├── database.js     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Database connection setup (MySQL)<br>
 ├── config/         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Contains configuration files<br>
 ├── logs-out/       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Stores request logs<br>
-└── server.js       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Main application entry point<br>
-
-
+├── server.js       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Main application entry point<br>
+├── swagger.js      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Configures Swagger for API documentation and serves the docs<br>
+└── swagger-output.json  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # Generated Swagger documentation output in JSON format<br>
 
