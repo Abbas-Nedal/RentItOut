@@ -4,8 +4,9 @@
     This is Code responsible for managing items.
  */
 const db = reqiure('../database');
+const logger = require('../config/logger');
 
-// first - Create new item
+//Create new item
 exports.createitem = async (req,res) => {
     try{
         const{user_id, name , description , quantity , category , price_per_day , available} = req.body;
@@ -22,3 +23,39 @@ exports.createitem = async (req,res) => {
             res.status(500).json({ error: 'Failed to create item.' });
         }
     };
+
+//update item by item_id
+exports.updateItem = async (req, res) => {
+    try {
+        const { item_id } = req.params;
+        const { user_id, name, description, quantity, category, price_per_day, available } = req.body;
+
+        const [item] = await db.query(`SELECT * FROM items WHERE id = ?`, [item_id]);
+
+        if (item.length === 0) {
+            logger.warn(`item with  ${item_id} not found`);
+            return res.status(404).json({ error: 'item not found.' });
+        }
+
+        await db.query(
+            `UPDATE items SET  user_id = ?, name = ?,  description = ?,  quantity = ?,  category = ?, price_per_day = ?, available = ?, updated_at = NOW()
+ WHERE id = ?`,
+            [
+                user_id || item[0].user_id,
+                name || item[0].name,
+                description || item[0].description,
+                quantity || item[0].quantity,
+                category || item[0].category,
+                price_per_day || item[0].price_per_day,
+                available !== undefined ? available : item[0].available,
+                item_id
+            ]
+        );
+
+        logger.info(`Item ${item_id} updated successfully`);
+        res.status(200).json({ message: 'item updated successfully.' });
+    } catch (err) {
+        logger.error(`Failed to update item: ${err.message}`);
+        res.status(500).json({ error: 'Failed to update item.' });
+    }
+};
