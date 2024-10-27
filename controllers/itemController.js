@@ -78,3 +78,24 @@ exports.deleteItem = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete item.' });
     }
 };
+
+
+//  Get item by item_id
+exports.getItemById = async (req, res) => {
+    try {
+        const { item_id } = req.params;
+
+        const [item] = await db.query(
+            `SELECT * FROM items WHERE id = ?`, [item_id]
+        );
+
+        if (item.length === 0) {
+            logger.warn(`Item with ID ${item_id} not found`);
+            return res.status(404).json({ error: 'Item not found.' });
+        }
+        res.status(200).json(item[0]);
+    } catch (err) {
+        logger.error(`Failed to fetch item: ${err.message}`);
+        res.status(500).json({ error: 'Failed to fetch item.' });
+    }
+};
