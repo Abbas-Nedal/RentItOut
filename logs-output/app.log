@@ -82,3 +82,8 @@
 2024-10-27T16:39:40.390Z [INFO]: POST /items - HTTP/1.1 - PostmanRuntime/7.42.0
 2024-10-27T16:39:43.490Z [INFO]: POST /item - HTTP/1.1 - PostmanRuntime/7.42.0
 2024-10-27T16:50:33.695Z [INFO]: Server running on port 3000
+2024-10-29T10:14:13.139Z [INFO]: Server running on port 3000
+2024-10-29T10:14:37.488Z [INFO]: GET /item - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-29T10:14:54.536Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-29T10:15:54.557Z [INFO]: Server running on port 3000
+2024-10-29T10:16:09.517Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0

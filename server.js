@@ -29,7 +29,7 @@ db.getConnection()
 app.use('/users', userRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/logistics', logisticRoutes);
-
+app.use('/item',itemRoutes);
 
 
 app.get('/', (req, res) => {
