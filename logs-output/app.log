@@ -246,6 +246,23 @@
 2024-10-27T12:53:49.988Z [INFO]: GET /reviews/items-with-reviews - HTTP/1.1 - PostmanRuntime/7.42.0
 2024-10-27T12:53:51.581Z [INFO]: GET /reviews/items-with-reviews - HTTP/1.1 - PostmanRuntime/7.42.0
 2024-10-27T12:55:05.336Z [INFO]: GET /reviews/items-with-reviews - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:28:42.950Z [INFO]: Server running on port 3000
+2024-10-27T16:30:17.041Z [INFO]: GET /api/items - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:30:39.499Z [INFO]: Server running on port 3000
+2024-10-27T16:33:45.813Z [INFO]: Server running on port 3000
+2024-10-27T16:34:12.169Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:35:22.293Z [INFO]: GET /api/items%0A - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:37:38.547Z [INFO]: GET /api/items - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0
+2024-10-27T16:37:45.564Z [INFO]: GET /items - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0
+2024-10-27T16:39:10.429Z [INFO]: POST /api/items - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:39:40.390Z [INFO]: POST /items - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:39:43.490Z [INFO]: POST /item - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-27T16:50:33.695Z [INFO]: Server running on port 3000
+2024-10-29T10:14:13.139Z [INFO]: Server running on port 3000
+2024-10-29T10:14:37.488Z [INFO]: GET /item - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-29T10:14:54.536Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-10-29T10:15:54.557Z [INFO]: Server running on port 3000
+2024-10-29T10:16:09.517Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0
 2024-10-26T20:44:33.213Z [INFO]: Server running on port 3000
 2024-10-26T20:44:41.846Z [INFO]: GET / - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
 2024-10-26T20:44:41.917Z [INFO]: GET /favicon.ico - HTTP/1.1 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
@@ -423,3 +440,4 @@
 2024-10-30T16:53:42.442Z [INFO]: Server running on port 3000
 2024-10-30T16:53:54.672Z [INFO]: Server running on port 3000
 2024-10-30T16:53:55.979Z [INFO]: Server running on port 3000
+
