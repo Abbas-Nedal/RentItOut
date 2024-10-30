@@ -34,6 +34,9 @@ exports.initializePayment = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+exports.processPayment = async (req, res) => {
+
+};
 
 
 exports.viewPaymentDetails = async (req, res) => {
