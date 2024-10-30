@@ -4,27 +4,6 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const SALT_ROUNDS = 12;
 
-const filterUserData = (user) => {
-    const { password, ...filteredUser } = user; 
-    return filteredUser;
-};
-
-
-
-
-// exports.loginUser = async (req, res) => {
-//     const { email, password } = req.body;
-
-//     const [user] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-
-//     if (user.length > 0 && await bcrypt.compare(password, user[0].password)) {
-//         const token = jwt.sign({ id: user[0].id, role: user[0].role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-//         return res.json({ token });
-//     } else {
-//         return res.status(401).json({ error: 'Invalid credentials' });
-//     }
-// };
-
 
 exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -40,25 +19,22 @@ exports.loginUser = async (req, res) => {
 };
 
 
-
-
-
-
 exports.getUsers = async (req, res) => {
     try {
-        const [users] = await db.query('SELECT * FROM users');
-        const filteredUsers = users.map(filterUserData);
-        res.status(200).json(filteredUsers);
+        const [users] = await db.query('SELECT name, address, phone_number FROM users');
+        res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch users' });
     }
 };
-
-exports.getUserById = async (req, res) => {
+exports.getUserLimitedInfoById = async (req, res) => {
     try {
-        const [user] = await db.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
+        const [user] = await db.query(
+            'SELECT name, address, phone_number FROM users WHERE id = ?',
+            [req.params.id]
+        );
         if (user.length > 0) {
-            res.status(200).json(filterUserData(user[0]));
+            res.status(200).json(user[0]); 
         } else {
             res.status(404).json({ error: 'User not found' });
         }
@@ -66,6 +42,65 @@ exports.getUserById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch user' });
     }
 };
+exports.getUsersLimitedInfoByName = async (req, res) => {
+    try {
+        const [users] = await db.query(
+            'SELECT name, address, phone_number FROM users WHERE name = ?',
+            [req.params.name]
+        );
+        if (users.length > 0) {
+            res.status(200).json(users);
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+};
+
+
+
+exports.getUsersAllInfo = async (req, res) => {
+    try {
+        const [users] = await db.query('SELECT id, name, email, phone_number, address, role, verified, created_at FROM users');
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+};
+exports.getUsersAllInfoById = async (req, res) => {
+    try {
+        const [user] = await db.query(
+            'SELECT id, name, email, phone_number, address, role, verified, created_at FROM users WHERE id = ?',
+            [req.params.id]
+        );
+        if (user.length > 0) {
+            res.status(200).json(user[0]);
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch user' });
+    }
+};
+exports.getUsersAllInfoByName = async (req, res) => {
+    try {
+        const [users] = await db.query(
+            'SELECT id, name, email, phone_number, address, role, verified, created_at FROM users WHERE name = ?',
+            [req.params.name]
+        );
+        if (users.length > 0) {
+            res.status(200).json(users);
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+};
+
+
+
 
 exports.createUser = async (req, res) => {
     const errors = validationResult(req);
