@@ -4,6 +4,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "devStart": "nodemon server.js",
     "start": "node server.js"
   },
   "keywords": [],
@@ -14,6 +15,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
@@ -21,6 +23,12 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.11.3",
     "sequelize": "^6.37.4",
+    "swagger-autogen": "^2.23.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "winston": "^3.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
