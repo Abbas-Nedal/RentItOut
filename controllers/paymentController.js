@@ -26,6 +26,7 @@ exports.initializePayment = async (req, res) => {
             return res.status(404).json({ error: "Rental not found or completed" });
         }
     //process
+       // TODO: Handle meny PaymentsForRental logic
         const result = await db.query(
             `INSERT INTO payment_transactions (rental_id, amount, payment_date, payment_method, status) VALUES (?, ?, NOW(), ?, 'pending')`,
             [rentalId, amount, paymentMethod]
@@ -98,6 +99,23 @@ exports.processRefund = async (req, res) => {
     }
 };
 exports.viewAllPaymentForUsers = async (req, res) => {
+    try {
+        // validate
+        if (!rentalId || !userID ) {
+            return res.status(400).json({ error: "All required fields must be provided" });
+        }
+        //process
+        // TODO: Handle meny PaymentsForRental logic
+        //const allPayments = await db.query(`SELECT * FROM payment_transactions WHERE `);
+        if (allPayments.length === 0) {
+            return res.status(404).json({ error: "No payments found" });
+        }
+
+        res.json({ payments: allPayments });
+    } catch (error) {
+        console.error("Error payment/allPayments:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 
 };
 
@@ -124,8 +142,45 @@ exports.viewPaymentDetails = async (req, res) => {
 };
 
 exports.viewAllPaymentsForRental = async (req, res) => {
+    try {
+        const { rentalId } = req.params;
+    // validate
+        if (!rentalId  ) {
+            return res.status(400).json({ error: "All required fields must be provided" });
+        }
+    //process
+        const payments = await db.query(
+            `SELECT * FROM payment_transactions WHERE rental_id = ?`,
+            [rentalId]
+        );
+
+        if (payments.length === 0) {
+            return res.status(404).json({ error: "No payments found for this rental" });
+        }
+
+        res.json({ payments });
+    } catch (error) {
+        console.error("Error paymentController/viewAllPaymentsForRental:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 
 };
-exports.viewAllPayments = async (req, res) => {
+exports.viewAllPayments = async (req, res) => { //TODO : Admin valdiation
+    try {
+    // validate
+        if (!rentalId  ) {
+            return res.status(400).json({ error: "All required fields must be provided" });
+        }
+    //process
+        const allPayments = await db.query(`SELECT * FROM payment_transactions`);
+        if (allPayments.length === 0) {
+            return res.status(404).json({ error: "No payments found" });
+        }
+
+        res.json({ payments: allPayments });
+    } catch (error) {
+        console.error("Error payment/allPayments:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 
 };
