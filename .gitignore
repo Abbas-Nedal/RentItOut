@@ -1,5 +1,5 @@
 /node_modules/
 /.vscode/
 /shehab_local/
-/RentItOutConnection.session.sql/
-/.env/
+.env
+RentItOutDatabaseConnection.session.sql

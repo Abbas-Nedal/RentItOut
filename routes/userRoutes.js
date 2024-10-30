@@ -33,16 +33,13 @@ router.get(
 
 router.post('/', 
   userValidation.createUserValidation, 
-  roleMiddleware.requireAdminRole, 
   userController.createUser); 
 
 router.put('/:id', 
   userValidation.updateUserValidation, 
-  roleMiddleware.requireAdminRole, 
   userController.updateUser); 
 
 router.delete('/:id', 
-  roleMiddleware.requireAdminRole, 
   userController.deleteUser); 
 
 
