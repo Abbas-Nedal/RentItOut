@@ -36,10 +36,10 @@ exports.initializePayment = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
-exports.processPayment = async (req, res) => {
+exports.processPayment = async (req, res) => { //TODO: consider payment type in processing
     try {
         const { rentalId, paymentId } = req.params;
-        //validate
+    //validate
         if (!rentalId || !paymentId ) {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
@@ -50,7 +50,7 @@ exports.processPayment = async (req, res) => {
         if (!payment) {
             return res.status(404).json({ error: "Payment not found or processed" });
         }
-        //process
+    //process
         const paymentSuccess = true;
         // firstly, it may ambigous, but acttuly i supposed if there a real pay so here we should call real paymnet
         // like PayPal, Visa ....., so it may be failed if no money
@@ -72,14 +72,37 @@ exports.processPayment = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+exports.processRefund = async (req, res) => {
+    try {
+        const { rentalId, paymentId } = req.params;
+    // validate
+        if (!rentalId || !paymentId ) {
+            return res.status(400).json({ error: "All required fields must be provided" });
+        }
+        const [rental] = await db.query(`SELECT * FROM rentals WHERE id = ? AND status = 'cancelled'`, [rentalId]);
+        if (!rental) {
+            return res.status(404).json({ error: "Rental not eligible for refund" });
+        }
+    //process
+        const result = await db.query(
+            `UPDATE payment_transactions SET status = 'refunded' WHERE id = ? AND rental_id = ? AND status = 'paid'`,
+            [paymentId, rentalId]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Payment not found or already refunded" });
+        }
+        res.json({ message: "Refund processed successfully" });
+    } catch (error) {
+        console.error("Error in paymentController/processRefund:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 
 exports.viewPaymentDetails = async (req, res) => {
 
 };
-exports.processRefund = async (req, res) => {
 
-};
 exports.viewAllPaymentsForRental = async (req, res) => {
 
 };
