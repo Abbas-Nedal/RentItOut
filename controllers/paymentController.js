@@ -17,17 +17,19 @@ exports.initializePayment = async (req, res) => {
     try {
         const { rentalId } = req.params;
         const { amount, paymentMethod } = req.body;
-
+    //validate
+        if (!rentalId || !amount || !paymentMethod ) {
+            return res.status(400).json({ error: "All required fields must be provided" });
+        }
         const [rental] = await db.query(`SELECT * FROM rentals WHERE id = ? AND status = 'pending'`, [rentalId]);
         if (!rental) {
             return res.status(404).json({ error: "Rental not found or already completed." });
         }
-
+    //process
         const result = await db.query(
             `INSERT INTO payment_transactions (rental_id, amount, payment_date, payment_method, status) VALUES (?, ?, NOW(), ?, 'pending')`,
             [rentalId, amount, paymentMethod]
         );
-
         res.status(201).json({ message: "Payment initialized", paymentId: result.insertId });
     } catch (error) {
         if (debug) console.error("Error in paymentController/initializePayment:", error);
