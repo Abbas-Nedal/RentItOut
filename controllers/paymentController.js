@@ -97,10 +97,30 @@ exports.processRefund = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+exports.viewAllPaymentForUsers = async (req, res) => {
 
+};
 
 exports.viewPaymentDetails = async (req, res) => {
-
+    try {
+        const { rentalId, paymentId } = req.params;
+    // validate
+        if (!rentalId || !paymentId ) {
+            return res.status(400).json({ error: "All required fields must be provided" });
+        }
+    //process
+        const [payment] = await db.query(
+            `SELECT * FROM payment_transactions WHERE rental_id = ? AND id = ?`,
+            [rentalId, paymentId]
+        );
+        if (!payment) {
+            return res.status(404).json({ error: "Payment not found" });
+        }
+        res.json({ payment });
+    } catch (error) {
+        console.error("Error in paymentController/viewingPaymentDetails:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 };
 
 exports.viewAllPaymentsForRental = async (req, res) => {
