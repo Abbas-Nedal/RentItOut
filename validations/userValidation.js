@@ -10,8 +10,7 @@ exports.createUserValidation = [
         .matches(/[@$!%*?&#]/).withMessage('Password must contain at least one special character'),
     body('phone_number').optional().isMobilePhone().withMessage('Invalid phone number'),
     body('address').optional().isString().trim(),
-    body('role').isIn(['user', 'admin']).withMessage('Invalid role'),
-    body('verified').isBoolean().withMessage('Verified must be true or false'),
+
 ];
 
 exports.updateUserValidation = [
