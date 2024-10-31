@@ -158,7 +158,7 @@ exports.viewRentalHistory = async (req, res) => {
     try {
         const userId = req.user && req.user.id;
         const { status } = req.query;
-        //check
+    //check
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized: User ID not found" });
         }
@@ -182,7 +182,26 @@ exports.viewRentalHistory = async (req, res) => {
     }
 };
 exports.viewRentalDetails = async (req, res) => {
-
+    try {
+        const rentalId = parseInt(req.params.rentalId, 10);
+    //check
+        if (isNaN(rentalId)) {
+            return res.status(400).json({ error: "Invalid rental ID" });
+        }
+    //process
+        const [rental] = await db.query(
+            `SELECT id, user_id, item_id, start_date, end_date, quantity, status, total_price, insurance_fee, platform_fee, created_at 
+             FROM rentals WHERE id = ?`,
+            [rentalId]
+        );
+        if (rental.length === 0) {
+            return res.status(404).json({ error: "Rental not found" });
+        }
+        res.json({ rental: rental[0] });
+    } catch (error) {
+        if (debug )   console.error("Error viewing rental details:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 };
 
 
