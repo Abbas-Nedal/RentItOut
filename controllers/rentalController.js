@@ -4,6 +4,8 @@
 *
 * rentals table :
 *   id
+*   amount_paid
+*   completed_at
 *   created_at
 *   end_date
 *   insurance_fee
@@ -16,10 +18,11 @@
 *   user_id
 * */
 const db = require('../database');
-
+const rentalModel = require("../models/rentalModel");
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
+
 //TODO : subtracte the number of items rented when compleete  ther fental form items
 exports.createRental = async (req, res) => { //TODO:Handle multbile creations
     try {
@@ -36,23 +39,27 @@ exports.createRental = async (req, res) => { //TODO:Handle multbile creations
         }
     //process
         const [itemPricePerDay] = await db.query(
-            `SELECT price_per_day FROM items WHERE id = ?`, [item_id]
+            `SELECT price_per_day, available_quantity FROM items WHERE id = ?`, [item_id]
         );
         if (!itemPricePerDay || itemPricePerDay.length === 0) {
             return res.status(404).json({ error: "Item not found" });
         }
         const dailyPrice = parseFloat(itemPricePerDay[0].price_per_day);
+        const availableQuantity = itemDetails[0].available_quantity;
+        if (quantity > availableQuantity) {
+            return res.status(400).json({ error: "available quantity less than requested for the requested item" });
+        }
+
         const rentalDays = (new Date(end_date) - new Date(start_date)) / (1000 * 60 * 60 * 24);
         const totalItemPrice = dailyPrice * quantity * rentalDays;
         const insurance_fee= insurance_fee_percentage* totalItemPrice
-        const  platform_fee= platform_fee_percentage * totalItemPrice
-
+        const platform_fee= platform_fee_percentage * totalItemPrice
         const total_price = totalItemPrice + (insurance_fee || 0) + (platform_fee || 0);
-        const newRental = await db.query(
-            `INSERT INTO rentals (user_id, item_id,created_at, quantity, start_date, end_date, insurance_fee, platform_fee, status, total_price) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, 'pending', ?)`,
-            [user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price]
-        );
-        res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price, status: 'pending'} });
+        const rentalData ={user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price}
+
+        const newRental = await rentalModel.createDBRental(rentalData);
+        res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, total_price, status: 'pending'} });
+        const updateItem = await rentalModel.decreaseAvailableQuantity(item_id, quantity)
     } catch (error) {
         if (debug )console.error("Error rentalController/creatRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
