@@ -185,10 +185,19 @@ exports.viewRentalDetails = async (req, res) => {
 
 };
 
-exports.viewActiveRentals = async (req, res) => {
-
-};
 
 exports.viewAllRentals = async (req, res) => {
-
+    try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: "Access denied admins only allowed" });
+        }
+        const [allRentals] = await db.query(`SELECT * FROM rentals`);
+        if (allRentals.length === 0) {
+            return res.status(404).json({ error: "No rentals found" });
+        }
+        res.json({ rentals: allRentals });
+    } catch (error) {
+        if (debug ) console.error("Error viewing all rentals:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 };
