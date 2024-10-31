@@ -68,6 +68,8 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
         }
     //process
         //TODO : insert completed_at
+        // ALTER TABLE rentals
+        // ADD COLUMN completed_at TIMESTAMP NULL;
         const [result] = await db.query(
             `UPDATE rentals SET status = 'completed', completed_at = NOW() 
              WHERE id = ? AND status = 'pending'`,

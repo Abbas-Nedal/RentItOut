@@ -11,8 +11,9 @@
 *   status
 * */
 const debug = true;
+const db = require('../database');
 
-
+// TODO: replace all "All required fields must be provided" to const
 exports.initializePayment = async (req, res) => {
     try {
         const { rentalId } = req.params;
@@ -94,7 +95,7 @@ exports.processRefund = async (req, res) => {
         }
         res.json({ message: "Refund processed successfully" });
     } catch (error) {
-        console.error("Error in paymentController/processRefund:", error);
+        if (debug)  console.error("Error in paymentController/processRefund:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -113,7 +114,7 @@ exports.viewAllPaymentForUsers = async (req, res) => {
 
         res.json({ payments: allPayments });
     } catch (error) {
-        console.error("Error payment/allPayments:", error);
+        if (debug) console.error("Error payment/allPayments:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 
@@ -136,7 +137,7 @@ exports.viewPaymentDetails = async (req, res) => {
         }
         res.json({ payment });
     } catch (error) {
-        console.error("Error in paymentController/viewingPaymentDetails:", error);
+        if (debug) console.error("Error in paymentController/viewingPaymentDetails:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -160,7 +161,7 @@ exports.viewAllPaymentsForRental = async (req, res) => {
 
         res.json({ payments });
     } catch (error) {
-        console.error("Error paymentController/viewAllPaymentsForRental:", error);
+        if (debug) console.error("Error paymentController/viewAllPaymentsForRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 
@@ -179,8 +180,7 @@ exports.viewAllPayments = async (req, res) => { //TODO : Admin valdiation
 
         res.json({ payments: allPayments });
     } catch (error) {
-        console.error("Error payment/allPayments:", error);
+        if (debug) console.error("Error payment/allPayments:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-
 };
