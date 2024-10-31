@@ -7,8 +7,10 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerFile = require('./swagger-output.json');
 
 const userRoutes = require('./routes/userRoutes');
+const rentalRoutes = require('./routes/rentalRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const logisticRoutes = require('./routes/logisticRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 app.use(bodyParser.json());
@@ -33,6 +35,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Define routes
 app.use('/users', userRoutes);
+app.use('/rentals', rentalRoutes)
+app.use('/payment',paymentRoutes )
 app.use('/reviews', reviewRoutes);
 app.use('/logistics', logisticRoutes);
 
