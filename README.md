@@ -22,7 +22,9 @@ After starting the application, you can access the API documentation at: http://
 ## Technologies
 - **Node.js**: The runtime environment for executing JavaScript code on the server.
 - **Express.js**: A web application framework for building APIs and handling HTTP requests.
-- **MySQL**: The relational database used to store user, item, and rental data.
+- **MySQL**: The relational database used to store user, item, and rental data (hosted on AWS RDS).
+- **AWS**: Amazon Web Services, used for hosting the MySQL database on Amazon RDS for reliable and scalable cloud database management.
+- **Docker**: A containerization tool that simplifies the deployment process by packaging the application and its dependencies into a container.
 - **Winston**: A logging library used to log requests and other system events.
 - **body-parser**: Middleware for parsing incoming request bodies in JSON format.
 - **Swagger**: A tool for auto-generating API documentation and testing endpoints.

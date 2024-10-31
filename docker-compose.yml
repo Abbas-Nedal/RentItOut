@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  rentitout_api:
+    build:
+      context: .
+    ports:
+      - "5050:3000"
+    container_name: RentItOut_Server

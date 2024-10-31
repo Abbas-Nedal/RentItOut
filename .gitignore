@@ -1,7 +1,9 @@
 /node_modules/
 /.vscode/
 /shehab_local/
-/logs-output/
 /swagger-output.json
 .env
-/RentItOutDatabaseConnection.session.sql
+RentItOutDatabaseConnection.session.sql
+/.idea
+/logs-output
+
