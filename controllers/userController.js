@@ -2,6 +2,7 @@ const db = require('../database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const { sendEmail } = require('../services/emailService'); 
 const SALT_ROUNDS = 12;
 
 
@@ -118,8 +119,6 @@ exports.getUsersAllInfoByName = async (req, res) => {
 };
 
 
-
-
 exports.createUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -143,11 +142,19 @@ exports.createUser = async (req, res) => {
             [name, email, hashedPassword, phone_number, address, defaultRole, defaultVerified]
         );
 
-        res.status(201).json({ message: 'User created successfully' });
+        await sendEmail(
+            email, 
+            'Welcome to RentItOut!', 
+            'Thank you for registering!', 
+            '<h1>Welcome to RentItOut!</h1><p>Thank you for registering!</p>' 
+        );
+
+        res.status(201).json({ message: 'User created successfully and email sent.' });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to create user' });
+        res.status(500).json({ error: 'Failed to create user or send email' });
     }
 };
+
 
 exports.updateUser = async (req, res) => {
     const errors = validationResult(req);
@@ -213,13 +220,15 @@ exports.updateUser = async (req, res) => {
 
         await db.query(query, params);
 
+        const emailSubject = 'Your Account Information has been Updated';
+        const emailText = `Hello ${name || user[0].name},\n\nYour account information has been successfully updated.\n\nBest regards,\nRentItOut Team`;
+        await sendEmail(email || user[0].email, emailSubject, emailText);
+
         res.status(200).json({ message: 'Profile updated successfully' });
     } catch (err) {
-        console.error('Error updating profile:', err);
-        res.status(500).json({ error: 'Failed to update profile' });
+        res.status(500).json({ error: 'Failed to update profile or sending email' });
     }
 };
-
 
 
 exports.deleteUser = async (req, res) => {
@@ -237,12 +246,20 @@ exports.deleteUser = async (req, res) => {
         if (user.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
+        const email = user[0].email
+
 
         await db.query('DELETE FROM users WHERE id = ?', [id]);
 
+        const emailSubject = 'Your Account has been Deleted';
+        const emailText = `Hello,\n\nYour account has been successfully deleted. If this was a mistake, please contact support.\n\nBest regards,\nRentItOut Team`;
+        await sendEmail(email, emailSubject, emailText); 
+
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (err) {
-        console.error('Error deleting user:', err);
-        res.status(500).json({ error: 'Failed to delete user' });
+        res.status(500).json({ error: 'Failed to delete user or sending email' });
     }
 };
+
+
+

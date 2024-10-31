@@ -10,6 +10,10 @@ router.post('/login', userController.loginUser);
 router.get('/', userController.getUsers);
 router.get('/id/:id', userController.getUserLimitedInfoById); 
 router.get('/name/:name', userController.getUsersLimitedInfoByName); 
+router.post('/', 
+  userValidation.createUserValidation, 
+  userController.createUser); 
+
 
 
 router.use(authMiddleware.authenticateToken); 
@@ -30,10 +34,6 @@ router.get(
 ); 
 
 
-
-router.post('/', 
-  userValidation.createUserValidation, 
-  userController.createUser); 
 
 router.put('/:id', 
   userValidation.updateUserValidation, 
