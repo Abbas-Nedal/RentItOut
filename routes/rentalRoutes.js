@@ -12,6 +12,7 @@ router.get('/admin/rentals', rentalControllers.viewAllRentals);
 module.exports = router;
 
 /**?
- * http://localhost:3000/rentals/1
+ * to create new Rental   : post http://localhost:3000/rentals/        | body *
+ * to view Rental Details : GET  http://localhost:3000/rentals/{id}    |
  *
  */

@@ -37,8 +37,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Define routes
 app.use('/users', userRoutes);
-app.use('/rentals', rentalRoutes)
-app.use('/payment',paymentRoutes )
+app.use('/rentals', rentalRoutes);
+app.use('/payments',paymentRoutes );
 app.use('/reviews', reviewRoutes);
 app.use('/logistics', logisticRoutes);
 app.use('/item',itemRoutes);

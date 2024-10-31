@@ -157,7 +157,8 @@ exports.extendRental = async (req, res) => {
 
 exports.viewRentalHistory = async (req, res) => {
     try {
-        const userId = req.user && req.user.id;
+        //const userId = req.user && req.user.id;
+        const {userId} = req.body;
         const { status } = req.query;
     //check
         if (!userId) {

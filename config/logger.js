@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const logDirectory = path.join(__dirname, '..', 'logs-output');
+const debug = true;
 if (!fs.existsSync(logDirectory)) {
     fs.mkdirSync(logDirectory);
 }
@@ -20,8 +21,7 @@ const logger = winston.createLogger({
     ],
 });
 
+// if (debug) {
+//     logger.add(new winston.transports.Console());
+// }
 module.exports = logger;
-
-
-
-
