@@ -3,3 +3,5 @@
 /shehab_local/
 .env
 RentItOutDatabaseConnection.session.sql
+/.idea
+/logs-output
