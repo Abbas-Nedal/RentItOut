@@ -59,6 +59,29 @@ exports.createRental = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+exports.completeRental = async (req, res) => {
+    try {
+        const rentalId = parseInt(req.params.rentalId, 10);
+    //check
+        if (isNaN(rentalId)) {
+            return res.status(400).json({ error: "Invalid rental ID" });
+        }
+    //process
+        //TODO : insert completed_at
+        const [result] = await db.query(
+            `UPDATE rentals SET status = 'completed', completed_at = NOW() 
+             WHERE id = ? AND status = 'pending'`,
+            [rentalId]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Rental not found or already completed" });
+        }
+        res.json({ message: "Rental completed successfully" });
+    } catch (error) {
+        console.error("Error completing rental:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 exports.cancelRental = async (req, res) => {
 
@@ -69,9 +92,7 @@ exports.viewRentalHistory = async (req, res) => {
 exports.viewRentalDetails = async (req, res) => {
 
 };
-exports.completeRental = async (req, res) => {
 
-};
 exports.viewActiveRentals = async (req, res) => {
 
 };
