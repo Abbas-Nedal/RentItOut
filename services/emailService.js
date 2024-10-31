@@ -1,21 +1,19 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Create a transporter using SMTP with Gmail
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,         // Use the host from .env
-    port: process.env.EMAIL_PORT,         // Use the port from .env
-    secure: process.env.EMAIL_SECURE === 'true', // Set secure based on .env
+    host: process.env.EMAIL_HOST,        
+    port: process.env.EMAIL_PORT,         
+    secure: process.env.EMAIL_SECURE === 'true', 
     auth: {
-        user: process.env.EMAIL_USERNAME, // Your Gmail email address
-        pass: process.env.EMAIL_PASSWORD,  // Your app password
+        user: process.env.EMAIL_USERNAME, 
+        pass: process.env.EMAIL_PASSWORD,  
     },
 });
 
-// Function to send email
 const sendEmail = async (to, subject, text, html) => {
     const mailOptions = {
-        from: process.env.EMAIL_USERNAME, // Set sender email from .env
+        from: process.env.EMAIL_USERNAME, 
         to,
         subject,
         text,
@@ -27,7 +25,7 @@ const sendEmail = async (to, subject, text, html) => {
         console.log('Email sent successfully');
     } catch (error) {
         console.error('Error sending email:', error);
-        throw error; // Optional: throw the error to handle it in the caller
+        throw error; 
     }
 };
 
