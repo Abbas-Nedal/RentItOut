@@ -20,7 +20,7 @@ const db = require('../database');
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
-
+//TODO : subtracte the number of items rented when compleete  ther fental form items
 exports.createRental = async (req, res) => { //TODO:Handle multbile creations
     try {
         const {

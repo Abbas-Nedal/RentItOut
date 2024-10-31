@@ -14,6 +14,7 @@ const debug = true;
 const db = require('../database');
 
 // TODO: replace all "All required fields must be provided" to const
+// TODO: make sth to handle the amount and total amount
 exports.initializePayment = async (req, res) => {
     try {
         const { rentalId } = req.params;
