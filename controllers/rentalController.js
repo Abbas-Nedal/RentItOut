@@ -78,7 +78,7 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
         }
         res.json({ message: "Rental completed successfully" });
     } catch (error) {
-        console.error("Error completing rental:", error);
+        if (debug ) console.error("Error rentalController/completRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -86,7 +86,7 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
 exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment !!!!
     try {
         const { rentalId } = req.params;
-        //check
+    //check
         if (isNaN(rentalId)) {
             return res.status(400).json({ error: "Invalid rental ID" });
         }
@@ -109,10 +109,51 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         }
         res.json({ message: "Rental cancelled successfully" });
     } catch (error) {
-        console.error("Error cancelling rental:", error);
+        if (debug )  console.error("Error rentalController/cancelRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+exports.extendRental = async (req, res) => {
+    try {
+        const rentalId = parseInt(req.params.rentalId, 10);
+        const { end_date } = req.body;
+    //check
+        if (isNaN(rentalId) || !end_date) {
+            return res.status(400).json({ error: "Invalid rental ID or New end date " });
+        }
+        const newEndDate = new Date(end_date);
+        if (isNaN(newEndDate.getTime())) {
+            return res.status(400).json({ error: "Invalid date format for end_date" });
+        }
+    //process
+        const [rental] = await db.query(
+            `SELECT end_date, status FROM rentals WHERE id = ?`,
+            [rentalId]
+        );
+        if (rental.length === 0) {
+            return res.status(404).json({ error: "Rental not found" });
+        }
+        const currentRental = rental[0];
+        if (currentRental.status !== 'pending') {
+            return res.status(400).json({ error: "Only pending rentals can be extended" });
+        }
+        if (newEndDate <= new Date(currentRental.end_date)) {
+            return res.status(400).json({ error: "New end date must be after the current end date" });
+        }
+        const result = await db.query(
+            `UPDATE rentals SET end_date = ? WHERE id = ? AND status = 'pending'`,
+            [newEndDate, rentalId]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(500).json({ error: "Unable to extend rental" });
+        }
+        res.json({ message: "Rental extended", new_end_date: newEndDate });
+    } catch (error) {
+        if (debug )  console.error("Error rentalController/extendRental:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 exports.viewRentalHistory = async (req, res) => {
 
 };
@@ -123,9 +164,7 @@ exports.viewRentalDetails = async (req, res) => {
 exports.viewActiveRentals = async (req, res) => {
 
 };
-exports.extendRental = async (req, res) => {
 
-};
 exports.viewAllRentals = async (req, res) => {
 
 };
