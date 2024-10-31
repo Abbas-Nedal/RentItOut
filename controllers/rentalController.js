@@ -59,7 +59,7 @@ exports.createRental = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
-exports.completeRental = async (req, res) => {
+exports.completeRental = async (req, res) => { //TODO : in payment, this done imppedely in code, so u should use this func
     try {
         const rentalId = parseInt(req.params.rentalId, 10);
     //check
@@ -83,8 +83,35 @@ exports.completeRental = async (req, res) => {
     }
 };
 
-exports.cancelRental = async (req, res) => {
-
+exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment !!!!
+    try {
+        const { rentalId } = req.params;
+        //check
+        if (isNaN(rentalId)) {
+            return res.status(400).json({ error: "Invalid rental ID" });
+        }
+        const rental = await db.query(
+            `SELECT status FROM rentals WHERE id = ?`,
+            [rentalId]
+        );
+        if (rental.length === 0) {
+            return res.status(404).json({ error: "Rental not found" });
+        }if (rental[0].status === 'completed') {
+            return res.status(400).json({ error: "Cannot cancel completed rental" });
+        }
+    //process
+        const result = await db.query(
+            `UPDATE rentals SET status = 'cancelled' WHERE id = ? AND status != 'completed'`,
+            [rentalId]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ error: "Rental is already cancelled or cannot be found" });
+        }
+        res.json({ message: "Rental cancelled successfully" });
+    } catch (error) {
+        console.error("Error cancelling rental:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 };
 exports.viewRentalHistory = async (req, res) => {
 
