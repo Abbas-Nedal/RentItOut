@@ -149,13 +149,37 @@ exports.extendRental = async (req, res) => {
         }
         res.json({ message: "Rental extended", new_end_date: newEndDate });
     } catch (error) {
-        if (debug )  console.error("Error rentalController/extendRental:", error);
+        if (debug)  console.error("Error rentalController/extendRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
 exports.viewRentalHistory = async (req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        const { status } = req.query;
+        //check
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized: User ID not found" });
+        }
+        let query = `SELECT id, start_date, end_date, status, total_price, created_at 
+                     FROM rentals WHERE user_id = ?`;
 
+        const params = [userId];
+        if (status) { // for filttering (if u want al history all status based history )
+            query += ` AND status = ?`;
+            params.push(status);
+        }
+    //process
+        const [rentalHistory] = await db.query(query, params);
+        if (rentalHistory.length === 0) {
+            return res.status(404).json({ message: "No rental history found" });
+        }
+        res.json({ rentals: rentalHistory });
+    } catch (error) {
+        if (debug ) console.error("Error viewing rental history:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 };
 exports.viewRentalDetails = async (req, res) => {
 
