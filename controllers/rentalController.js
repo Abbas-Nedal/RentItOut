@@ -24,7 +24,7 @@ const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
 
 //TODO : subtracte the number of items rented when compleete  ther fental form items
-exports.createRental = async (req, res) => { //TODO:Handle multbile creations
+exports.createRental = async (req, res) => { //TODO:Handle multibile creations
     try {
         const {
             user_id,
@@ -58,13 +58,18 @@ exports.createRental = async (req, res) => { //TODO:Handle multbile creations
         const rentalData ={user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price}
 
         const newRental = await rentalModel.createDBRental(rentalData);
-        res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, total_price, status: 'pending'} });
-        const updateItem = await rentalModel.decreaseAvailableQuantity(item_id, quantity)
+        try {
+            await rentalModel.decreaseAvailableQuantity(item_id, quantity)
+            res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, total_price, status: 'pending'} });
+        }catch (err){
+            res.status(500).json({ error: "Failed to decrease available quantity: Insufficient available quantity or item not found" });
+        }
     } catch (error) {
         if (debug )console.error("Error rentalController/creatRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 exports.completeRental = async (req, res) => { //TODO : in payment, this done imppedely in code, so u should use this func
     try {
         const rentalId = parseInt(req.params.rentalId, 10);
@@ -73,9 +78,6 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
             return res.status(400).json({ error: "Invalid rental ID" });
         }
     //process
-        //TODO : insert completed_at
-        // ALTER TABLE rentals
-        // ADD COLUMN completed_at TIMESTAMP NULL;
         const [result] = await db.query(
             `UPDATE rentals SET status = 'completed', completed_at = NOW() 
              WHERE id = ? AND status = 'pending'`,
@@ -84,7 +86,18 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Rental not found or already completed" });
         }
-        res.json({ message: "Rental completed successfully" });
+        const [rental] = await db.query(
+            `SELECT quantity, item_id FROM rentals WHERE id = ?`, [rentalId]
+        );
+        if (!rental || rental.length === 0) {
+            return res.status(404).json({ error: "Rental not found" });
+        }
+        try {
+            await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
+            res.json({ message: "Rental completed successfully" });
+        }catch (err){
+            res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
+        }
     } catch (error) {
         if (debug ) console.error("Error rentalController/completRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -99,7 +112,7 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
             return res.status(400).json({ error: "Invalid rental ID" });
         }
         const rental = await db.query(
-            `SELECT status FROM rentals WHERE id = ?`,
+            `SELECT status, quantity, item_id FROM rentals WHERE id = ?`,
             [rentalId]
         );
         if (rental.length === 0) {
@@ -115,12 +128,18 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         if (result.affectedRows === 0) {
             return res.status(400).json({ error: "Rental is already cancelled or cannot be found" });
         }
-        res.json({ message: "Rental cancelled successfully" });
+        try {
+            await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
+            res.json({ message: "Rental cancelled successfully" });
+        }catch (err){
+            res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
+        }
     } catch (error) {
         if (debug )  console.error("Error rentalController/cancelRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 exports.extendRental = async (req, res) => {
     try {
         const rentalId = parseInt(req.params.rentalId, 10);
