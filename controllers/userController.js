@@ -144,9 +144,9 @@ exports.createUser = async (req, res) => {
 
         await sendEmail(
             email, 
-            'Welcome to RentItOut!', 
+            'Welcome to Rent It Out!', 
             'Thank you for registering!', 
-            '<h1>Welcome to RentItOut!</h1><p>Thank you for registering!</p>' 
+            '<h1>Welcome to Rent It Out!</h1><p>Thank you for registering!</p>' 
         );
 
         res.status(201).json({ message: 'User created successfully and email sent.' });
@@ -221,7 +221,7 @@ exports.updateUser = async (req, res) => {
         await db.query(query, params);
 
         const emailSubject = 'Your Account Information has been Updated';
-        const emailText = `Hello ${name || user[0].name},\n\nYour account information has been successfully updated.\n\nBest regards,\nRentItOut Team`;
+        const emailText = `Hello ${name || user[0].name},\n\nYour account information has been successfully updated.\n\nBest regards,\nRent It Out Team`;
         await sendEmail(email || user[0].email, emailSubject, emailText);
 
         res.status(200).json({ message: 'Profile updated successfully' });
@@ -252,7 +252,7 @@ exports.deleteUser = async (req, res) => {
         await db.query('DELETE FROM users WHERE id = ?', [id]);
 
         const emailSubject = 'Your Account has been Deleted';
-        const emailText = `Hello,\n\nYour account has been successfully deleted. If this was a mistake, please contact support.\n\nBest regards,\nRentItOut Team`;
+        const emailText = `Hello,\n\nYour account has been successfully deleted. If this was a mistake, please contact support.\n\nBest regards,\nRent It Out Team`;
         await sendEmail(email, emailSubject, emailText); 
 
         res.status(200).json({ message: 'User deleted successfully' });

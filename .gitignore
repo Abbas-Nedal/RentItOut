@@ -5,4 +5,4 @@
 .env
 RentItOutDatabaseConnection.session.sql
 /.idea
-/logs-output
+/logs-output/

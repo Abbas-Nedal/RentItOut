@@ -24,7 +24,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Test DB connection
 db.getConnection()
     .then(connection => {
         console.log('Database connected');
@@ -35,7 +34,7 @@ db.getConnection()
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-// Define routes
+
 app.use('/users', userRoutes);
 app.use('/rentals', rentalRoutes);
 app.use('/rentals',paymentRoutes );
@@ -44,12 +43,11 @@ app.use('/logistics', logisticRoutes);
 app.use('/item',itemRoutes);
 
 
-// Default route
 app.get('/', (req, res) => {
-    res.send('Welcome to RentItOut API');
+    res.send('Welcome to RentItOut Platform!');
 });
 
-// Start the server
+
 const PORT = 3000;
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
