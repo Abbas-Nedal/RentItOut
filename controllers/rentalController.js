@@ -57,7 +57,7 @@ exports.createRental = async (req, res) => { //TODO:Handle multibile creations
         const total_price = totalItemPrice + (insurance_fee || 0) + (platform_fee || 0);
         const rentalData ={user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price}
 
-        const newRental = await rentalModel.createDBRental(rentalData);
+        const newRental = await rentalModel.createRental(rentalData);
         try {
             await rentalModel.decreaseAvailableQuantity(item_id, quantity)
             res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, total_price, status: 'pending'} });
@@ -78,11 +78,7 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
             return res.status(400).json({ error: "Invalid rental ID" });
         }
     //process
-        const [result] = await db.query(
-            `UPDATE rentals SET status = 'completed', completed_at = NOW() 
-             WHERE id = ? AND status = 'pending'`,
-            [rentalId]
-        );
+        const [result] = await rentalModel.cancelRental(rentalId)
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Rental not found or already completed" });
         }
@@ -111,20 +107,14 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         if (isNaN(rentalId)) {
             return res.status(400).json({ error: "Invalid rental ID" });
         }
-        const rental = await db.query(
-            `SELECT status, quantity, item_id FROM rentals WHERE id = ?`,
-            [rentalId]
-        );
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
             return res.status(404).json({ error: "Rental not found" });
         }if (rental[0].status === 'completed') {
             return res.status(400).json({ error: "Cannot cancel completed rental" });
         }
     //process
-        const result = await db.query(
-            `UPDATE rentals SET status = 'cancelled' WHERE id = ? AND status != 'completed'`,
-            [rentalId]
-        );
+        const result = await rentalModel.cancelRental(rentalId);
         if (result.affectedRows === 0) {
             return res.status(400).json({ error: "Rental is already cancelled or cannot be found" });
         }
@@ -153,10 +143,7 @@ exports.extendRental = async (req, res) => {
             return res.status(400).json({ error: "Invalid date format for end_date" });
         }
     //process
-        const [rental] = await db.query(
-            `SELECT end_date, status FROM rentals WHERE id = ?`,
-            [rentalId]
-        );
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
             return res.status(404).json({ error: "Rental not found" });
         }
@@ -167,10 +154,7 @@ exports.extendRental = async (req, res) => {
         if (newEndDate <= new Date(currentRental.end_date)) {
             return res.status(400).json({ error: "New end date must be after the current end date" });
         }
-        const result = await db.query(
-            `UPDATE rentals SET end_date = ? WHERE id = ? AND status = 'pending'`,
-            [newEndDate, rentalId]
-        );
+        const result = await rentalModel.extendRental(rentalId,newEndDate)
         if (result.affectedRows === 0) {
             return res.status(500).json({ error: "Unable to extend rental" });
         }
@@ -183,23 +167,14 @@ exports.extendRental = async (req, res) => {
 
 exports.viewRentalHistory = async (req, res) => {
     try {
-        //const userId = req.user && req.user.id;
-        const {userId} = req.body;
+        const { userId } = req.body;
         const { status } = req.query;
     //check
         if (!userId) {
-            return res.status(401).json({ error: "Unauthorized: User ID not found" });
-        }
-        let query = `SELECT id, start_date, end_date, status, total_price, created_at 
-                     FROM rentals WHERE user_id = ?`;
-
-        const params = [userId];
-        if (status) { // for filttering (if u want al history all status based history )
-            query += ` AND status = ?`;
-            params.push(status);
+            return res.status(401).json({ error: "User ID not found" });
         }
     //process
-        const [rentalHistory] = await db.query(query, params);
+        const [rentalHistory] = await rentalModel.getUserRentalHistory(userId, status);
         if (rentalHistory.length === 0) {
             return res.status(404).json({ message: "No rental history found" });
         }
@@ -217,11 +192,7 @@ exports.viewRentalDetails = async (req, res) => {
             return res.status(400).json({ error: "Invalid rental ID" });
         }
     //process
-        const [rental] = await db.query(
-            `SELECT id, user_id, item_id, start_date, end_date, quantity, status, total_price, insurance_fee, platform_fee, created_at 
-             FROM rentals WHERE id = ?`,
-            [rentalId]
-        );
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
             return res.status(404).json({ error: "Rental not found" });
         }
@@ -235,10 +206,10 @@ exports.viewRentalDetails = async (req, res) => {
 
 exports.viewAllRentals = async (req, res) => {
     try {
-        if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).json({ error: "Access denied admins only allowed" });
-        }
-        const [allRentals] = await db.query(`SELECT * FROM rentals`);
+        // if (!req.user || req.user.role !== 'admin') {
+        //     return res.status(403).json({ error: "Access denied admins only allowed" });
+        // }
+        const [allRentals] = await rentalModel.getAllRentals;
         if (allRentals.length === 0) {
             return res.status(404).json({ error: "No rentals found" });
         }
