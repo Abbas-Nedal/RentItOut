@@ -12,8 +12,8 @@ exports.createRental = async (rentalData) => {
         total_price
     } = rentalData;
     const query = `
-        INSERT INTO rentals (user_id, item_id, quantity, start_date, end_date, created_at, insurance_fee, platform_fee, total_price, status)
-        VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, 'pending');
+        INSERT INTO rentals (user_id, item_id, quantity, start_date, end_date, created_at, insurance_fee, platform_fee, total_price, status,amount_paid)
+        VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, 'pending',0);
     `;
     const [result] = await db.query(query, [
         user_id, item_id, quantity, start_date, end_date,

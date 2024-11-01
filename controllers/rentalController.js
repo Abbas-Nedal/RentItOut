@@ -22,8 +22,10 @@ const rentalModel = require("../models/rentalModel");
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
+const cashback_percentage = 0.5
+//TODO: in completeRental u should handle notification and detremine who called this method?????
 
-//TODO : subtracte the number of items rented when compleete  ther fental form items
+
 exports.createRental = async (req, res) => { //TODO:Handle multibile creations
     try {
         const {
@@ -82,14 +84,15 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Rental not found or already completed" });
         }
-        const [rental] = await db.query(
-            `SELECT quantity, item_id FROM rentals WHERE id = ?`, [rentalId]
-        );
-        if (!rental || rental.length === 0) {
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
+        if (!rental) {
             return res.status(404).json({ error: "Rental not found" });
         }
+        if (rental.paid !== 1) {
+            return res.status(404).json({ error: "Rental not paid yet" });
+        }
         try {
-            await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
+            await rentalModel.increaseAvailableQuantity(rental.item_id, rental.quantity)
             res.json({ message: "Rental completed successfully" });
         }catch (err){
             res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
@@ -113,6 +116,8 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         }if (rental[0].status === 'completed') {
             return res.status(400).json({ error: "Cannot cancel completed rental" });
         }
+        const cashback = rental[0].amount_paid * cashback_percentage
+
     //process
         const result = await rentalModel.cancelRental(rentalId);
         if (result.affectedRows === 0) {
@@ -120,7 +125,7 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         }
         try {
             await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
-            res.json({ message: "Rental cancelled successfully" });
+            res.json({ message: "Rental cancelled successfully", cashback: cashback });
         }catch (err){
             res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
         }
