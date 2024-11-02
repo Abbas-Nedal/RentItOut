@@ -55,6 +55,7 @@ exports.updateItem = async (req, res) => {
         logger.info(`Item ${item_id} updated successfully`);
         res.status(200).json({ message: 'item updated successfully.' });
     } catch (err) {
+
         logger.error(`Failed to update item: ${err.message}`);
         res.status(500).json({ error: 'Failed to update item.' });
     }
@@ -100,6 +101,25 @@ exports.getItemById = async (req, res) => {
     }
 };
 
+// Get item by category
+exports.getItemsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        const [items] = await db.query(
+            `SELECT * FROM items WHERE category = ?`, [category]
+        );
+
+        if (items.length === 0) {
+            logger.warn(`No items found in category ${category}`);
+            return res.status(404).json({ error: 'No items found in this category.' });
+        }
+        res.status(200).json(items);
+    } catch (err) {
+        logger.error(`Failed to fetch items: ${err.message}`);
+        res.status(500).json({ error: 'Failed to fetch items.' });
+    }
+};
 
 // Get all items
 exports.getAllItems = async (req, res) => {

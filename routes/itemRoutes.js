@@ -9,15 +9,15 @@ router.put('/:item_id', itemController.updateItem);
 router.delete('/:item_id', itemController.deleteItem);
 router.get('/:item_id', itemController.getItemById);
 router.get('/', itemController.getAllItems);
-
+router.get('/category/:category', itemController.getItemsByCategory); // Correct the reference here
 module.exports = router;
 
 /*
 to test , use routes:
   POST http://localhost:3000/item/
-  PUT  http://localhost:3000/item/:item_id
-  DELETE http://localhost:3000/item/:item_id
-  GET http://localhost:3000/item/:item_id
+  PUT  http://localhost:3000/item/item_id
+  DELETE http://localhost:3000/item/item_id
+  GET http://localhost:3000/item/item_id
   GET http://localhost:3000/item/
-
+  GET http://localhost:3000/item/category/categoryname
 */
