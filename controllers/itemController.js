@@ -10,11 +10,11 @@ const logger = require('../config/logger');
 // Create new item
 exports.createitem = async (req,res) => {
     try{
-        const{user_id, name , description , quantity , category , price_per_day , available} = req.body;
+        const{user_id, name , description , quantity , category , price_per_day , available,available_quantity} = req.body;
 
         const [item]= await db.query(
-            `INSERT INTO items (user_id, name, description, quantity, category, price_per_day, available, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-        [user_id, name, description, quantity, category, price_per_day, available]
+            `INSERT INTO items (user_id, name, description, quantity, category, price_per_day, available, available_quantity , created_at) VALUES (?, ?, ?, ? , ?, ?, ?, ?, NOW())`,
+        [user_id, name, description, quantity, category, price_per_day, available, available_quantity]
     );
         console.info(`Item ${name} create successfully`);
          res.status(201).json({ message: 'Item created successfully.' });
@@ -28,7 +28,7 @@ exports.createitem = async (req,res) => {
 exports.updateItem = async (req, res) => {
     try {
         const { item_id } = req.params;
-        const { user_id, name, description, quantity, category, price_per_day, available } = req.body;
+        const { user_id, name, description, quantity, category, price_per_day, available , available_quantity } = req.body;
 
         const [item] = await db.query(`SELECT * FROM items WHERE id = ?`, [item_id]);
 
@@ -38,7 +38,7 @@ exports.updateItem = async (req, res) => {
         }
 
         await db.query(
-            `UPDATE items SET  user_id = ?, name = ?,  description = ?,  quantity = ?,  category = ?, price_per_day = ?, available = ?, updated_at = NOW() WHERE id = ?`,
+            `UPDATE items SET  user_id = ?, name = ?,  description = ?,  quantity = ?,  category = ?, price_per_day = ?, available = ?, available_quantity = ?, updated_at = NOW() WHERE id = ?`,
             [
                 user_id || item[0].user_id,
                 name || item[0].name,
@@ -47,6 +47,7 @@ exports.updateItem = async (req, res) => {
                 category || item[0].category,
                 price_per_day || item[0].price_per_day,
                 available !== undefined ? available : item[0].available,
+                available_quantity  !== undefined ? available_quantity : item[0].available_quantity,
                 item_id
             ]
         );
