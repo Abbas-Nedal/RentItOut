@@ -16,10 +16,10 @@ exports.createitem = async (req,res) => {
             `INSERT INTO items (user_id, name, description, quantity, category, price_per_day, available, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
         [user_id, name, description, quantity, category, price_per_day, available]
     );
-        logger.info(`Item ${name} create successfully`);
+        console.info(`Item ${name} create successfully`);
          res.status(201).json({ message: 'Item created successfully.' });
     }catch (err) {
-            logger.error(`Faild to create item :${err.message}`);
+        console.error(`Faild to create item :${err.message}`);
             res.status(500).json({ error: 'Failed to create item.' });
         }
     };
@@ -104,7 +104,13 @@ exports.getItemById = async (req, res) => {
 exports.getAllItems = async (req, res) => {
     try {
         const [items] = await db.query(
-            `SELECT * FROM items`
+            `SELECT
+                items.*,
+                COALESCE(COUNT(reviews.id), 0) AS reviewCount,
+                COALESCE(AVG(reviews.rating), 0) AS averageRating
+            FROM items
+            LEFT JOIN reviews ON items.id = reviews.item_id
+            GROUP BY items.id`
         );
         res.status(200).json(items);
     } catch (err) {
