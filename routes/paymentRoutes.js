@@ -7,7 +7,7 @@ router.post('/:rentalId/payments/:paymentId/process', paymentController.processP
 router.post('/:rentalId/payments/:paymentId/refund', paymentController.processRefund);
 
 router.get('/:rentalId/payments/:paymentId', paymentController.viewPaymentDetails);
-router.get('/:rentalId/payments', paymentController.viewAllPaymentsForRental);
+// router.get('/:rentalId/payments', paymentController.viewAllPaymentsForRental);
 router.get('/admin/payments', paymentController.viewAllPayments);
 router.get('/user/:userId/payments', paymentController.viewAllPaymentForUsers);
 

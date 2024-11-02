@@ -19,6 +19,9 @@
 * */
 const db = require('../database');
 const rentalModel = require("../models/rentalModel");
+const paymentModel = require("../models/paymentModel");
+
+const {initializePayment, processRefund} = require("./paymentController");
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
@@ -62,8 +65,28 @@ exports.createRental = async (req, res) => { //TODO:Handle multibile creations
         const newRental = await rentalModel.createRental(rentalData);
         try {
             await rentalModel.decreaseAvailableQuantity(item_id, quantity)
-            res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, total_price, status: 'pending'} });
-        }catch (err){
+
+            const paymentData = { rentalId: newRental.insertId, amount: total_price };
+            const mockReq = {
+                body: paymentData
+            };
+            const paymentResponse = await initializePayment(mockReq, res);
+            res.status(201).json({
+                message: "Rental and Payment initialized successfully",
+                rental: {
+                    id: newRental.insertId,
+                    user_id,
+                    item_id,
+                    quantity,
+                    start_date,
+                    end_date,
+                    insurance_fee,
+                    total_price,
+                    status: 'pending'
+                },
+                payment: paymentResponse
+            });
+        } catch (err){
             res.status(500).json({ error: "Failed to decrease available quantity: Insufficient available quantity or item not found" });
         }
     } catch (error) {
@@ -118,6 +141,19 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         }
         const cashback = rental[0].amount_paid * cashback_percentage
 
+        const payment = await paymentModel.getPaymentDetailsByRentalId(rentalId);
+
+        if (payment.length > 0) {
+            const paymentId = payment[0].id;
+            const paymentData = { rentalId:rentalId, paymentId: paymentId };
+            const mockReq = {
+                params: paymentData
+            };
+            const refundResponse = await processRefund(mockReq, res);
+            if (refundResponse.error) {
+                return res.status(refundResponse.status).json({ error: refundResponse.error });
+            }
+        }
     //process
         const result = await rentalModel.cancelRental(rentalId);
         if (result.affectedRows === 0) {
