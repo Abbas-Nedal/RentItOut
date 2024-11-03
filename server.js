@@ -36,8 +36,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 
 app.use('/users', userRoutes);
-app.use('/rentals', rentalRoutes);
-app.use('/rentals',paymentRoutes );
+app.use('/api/v1/rentals', rentalRoutes);
+app.use('/api/v1/rentals',paymentRoutes );
 app.use('/reviews', reviewRoutes);
 app.use('/logistics', logisticRoutes);
 app.use('/item',itemRoutes);
