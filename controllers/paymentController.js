@@ -12,6 +12,8 @@
 * */
 const debug = true;
 const paymentModel = require('../models/paymentModel');
+const { convertCurrency } = require('../services/currencyService');
+
 const ERROR_MESSAGES = {
     REQUIRED_FIELDS: "All required fields must be provided",
     RENTAL_NOT_FOUND: "Rental not found or completed",
@@ -37,9 +39,14 @@ exports.initializePayment = async (req, res) => {
         if (!rental) {
             return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
-
+    //External API
+        const amountUSD = await convertCurrency(currency,"USD",amount)
+        console.log(amountUSD)
+        if (!amountUSD) {
+            return handleError(res, 404,"Currency conversion failed");
+        }
     //process
-        const paymentId = await paymentModel.insertPaymentTransaction(rentalId, amount, paymentMethod);
+        const paymentId = await paymentModel.insertPaymentTransaction(rentalId, amountUSD, paymentMethod);
         res.status(201).json({
             message: "Payment initialized",
             paymentId: paymentId,
@@ -72,14 +79,6 @@ exports.processPayment = async (req, res) => {
         const payment = await paymentModel.getPendingPaymentById(paymentId, rentalId);
         if (!payment) {
             return handleError(res, 404, ERROR_MESSAGES.PAYMENT_NOT_FOUND);
-        }
-    //External API
-        if (currency==="USD"){
-
-        }else if (currency==="JOD"){
-
-        }else if (currency==="AED"){
-
         }
     //process
         const paymentSuccess = true;
