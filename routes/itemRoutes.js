@@ -9,7 +9,9 @@ router.put('/:item_id', itemController.updateItem);
 router.delete('/:item_id', itemController.deleteItem);
 router.get('/:item_id', itemController.getItemById);
 router.get('/', itemController.getAllItems);
-router.get('/category/:category', itemController.getItemsByCategory); // Correct the reference here
+router.get('/category/:category', itemController.getItemsByCategory);
+router.get('/user/:user_id', itemController.getItemsByUserId);
+
 module.exports = router;
 
 /*

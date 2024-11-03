@@ -139,3 +139,22 @@ exports.getAllItems = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch items.' });
     }
 };
+
+// get items by user_id
+exports.getItemsByUserId = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const [items] = await db.query(`SELECT * FROM items WHERE user_id = ?`, [user_id]);
+
+        if (items.length === 0) {
+            logger.warn(`No items found for user ID ${user_id}`);
+            return res.status(404).json({ error: 'No items found for this user ID.' });
+        }
+        res.status(200).json(items);
+    } catch (err) {
+        logger.error(`Failed to fetch items: ${err.message}`);
+        res.status(500).json({ error: 'Failed to fetch items.' });
+    }
+};
+
