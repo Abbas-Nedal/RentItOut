@@ -1,0 +1,6 @@
+2024-11-02T09:40:26.694Z [INFO]: Server running on port 3000
+2024-11-02T09:40:34.146Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-11-02T10:54:40.027Z [INFO]: Server running on port 3000
+2024-11-02T10:59:15.582Z [INFO]: GET /item/ - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-11-02T11:00:13.106Z [INFO]: GET /reviews/17 - HTTP/1.1 - PostmanRuntime/7.42.0
+2024-11-02T11:14:40.157Z [INFO]: GET /reviews/17 - HTTP/1.1 - PostmanRuntime/7.42.0
