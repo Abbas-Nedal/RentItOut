@@ -4,6 +4,8 @@
 *
 * rentals table :
 *   id
+*   amount_paid
+*   completed_at
 *   created_at
 *   end_date
 *   insurance_fee
@@ -16,12 +18,18 @@
 *   user_id
 * */
 const db = require('../database');
+const rentalModel = require("../models/rentalModel");
+const paymentModel = require("../models/paymentModel");
 
+const {initializePayment, processRefund} = require("./paymentController");
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
-//TODO : subtracte the number of items rented when compleete  ther fental form items
-exports.createRental = async (req, res) => { //TODO:Handle multbile creations
+const cashback_percentage = 0.5
+//TODO: in completeRental u should handle notification and detremine who called this method?????
+
+
+exports.createRental = async (req, res) => { //TODO:Handle multibile creations
     try {
         const {
             user_id,
@@ -36,28 +44,57 @@ exports.createRental = async (req, res) => { //TODO:Handle multbile creations
         }
     //process
         const [itemPricePerDay] = await db.query(
-            `SELECT price_per_day FROM items WHERE id = ?`, [item_id]
+            `SELECT price_per_day, available_quantity FROM items WHERE id = ?`, [item_id]
         );
         if (!itemPricePerDay || itemPricePerDay.length === 0) {
             return res.status(404).json({ error: "Item not found" });
         }
         const dailyPrice = parseFloat(itemPricePerDay[0].price_per_day);
+        const availableQuantity = itemDetails[0].available_quantity;
+        if (quantity > availableQuantity) {
+            return res.status(400).json({ error: "available quantity less than requested for the requested item" });
+        }
+
         const rentalDays = (new Date(end_date) - new Date(start_date)) / (1000 * 60 * 60 * 24);
         const totalItemPrice = dailyPrice * quantity * rentalDays;
         const insurance_fee= insurance_fee_percentage* totalItemPrice
-        const  platform_fee= platform_fee_percentage * totalItemPrice
-
+        const platform_fee= platform_fee_percentage * totalItemPrice
         const total_price = totalItemPrice + (insurance_fee || 0) + (platform_fee || 0);
-        const newRental = await db.query(
-            `INSERT INTO rentals (user_id, item_id,created_at, quantity, start_date, end_date, insurance_fee, platform_fee, status, total_price) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, 'pending', ?)`,
-            [user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price]
-        );
-        res.status(201).json({ message: "Rental created", rental: { id: newRental.insertId, user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price, status: 'pending'} });
+        const rentalData ={user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price}
+
+        const newRental = await rentalModel.createRental(rentalData);
+        try {
+            await rentalModel.decreaseAvailableQuantity(item_id, quantity)
+
+            const paymentData = { rentalId: newRental.insertId, amount: total_price };
+            const mockReq = {
+                body: paymentData
+            };
+            const paymentResponse = await initializePayment(mockReq, res);
+            res.status(201).json({
+                message: "Rental and Payment initialized successfully",
+                rental: {
+                    id: newRental.insertId,
+                    user_id,
+                    item_id,
+                    quantity,
+                    start_date,
+                    end_date,
+                    insurance_fee,
+                    total_price,
+                    status: 'pending'
+                },
+                payment: paymentResponse
+            });
+        } catch (err){
+            res.status(500).json({ error: "Failed to decrease available quantity: Insufficient available quantity or item not found" });
+        }
     } catch (error) {
         if (debug )console.error("Error rentalController/creatRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 exports.completeRental = async (req, res) => { //TODO : in payment, this done imppedely in code, so u should use this func
     try {
         const rentalId = parseInt(req.params.rentalId, 10);
@@ -66,18 +103,23 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
             return res.status(400).json({ error: "Invalid rental ID" });
         }
     //process
-        //TODO : insert completed_at
-        // ALTER TABLE rentals
-        // ADD COLUMN completed_at TIMESTAMP NULL;
-        const [result] = await db.query(
-            `UPDATE rentals SET status = 'completed', completed_at = NOW() 
-             WHERE id = ? AND status = 'pending'`,
-            [rentalId]
-        );
+        const [result] = await rentalModel.cancelRental(rentalId)
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Rental not found or already completed" });
         }
-        res.json({ message: "Rental completed successfully" });
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
+        if (!rental) {
+            return res.status(404).json({ error: "Rental not found" });
+        }
+        if (rental.paid !== 1) {
+            return res.status(404).json({ error: "Rental not paid yet" });
+        }
+        try {
+            await rentalModel.increaseAvailableQuantity(rental.item_id, rental.quantity)
+            res.json({ message: "Rental completed successfully" });
+        }catch (err){
+            res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
+        }
     } catch (error) {
         if (debug ) console.error("Error rentalController/completRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -91,29 +133,44 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         if (isNaN(rentalId)) {
             return res.status(400).json({ error: "Invalid rental ID" });
         }
-        const rental = await db.query(
-            `SELECT status FROM rentals WHERE id = ?`,
-            [rentalId]
-        );
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
             return res.status(404).json({ error: "Rental not found" });
         }if (rental[0].status === 'completed') {
             return res.status(400).json({ error: "Cannot cancel completed rental" });
         }
+        const cashback = rental[0].amount_paid * cashback_percentage
+
+        const payment = await paymentModel.getPaymentDetailsByRentalId(rentalId);
+
+        if (payment.length > 0) {
+            const paymentId = payment[0].id;
+            const paymentData = { rentalId:rentalId, paymentId: paymentId };
+            const mockReq = {
+                params: paymentData
+            };
+            const refundResponse = await processRefund(mockReq, res);
+            if (refundResponse.error) {
+                return res.status(refundResponse.status).json({ error: refundResponse.error });
+            }
+        }
     //process
-        const result = await db.query(
-            `UPDATE rentals SET status = 'cancelled' WHERE id = ? AND status != 'completed'`,
-            [rentalId]
-        );
+        const result = await rentalModel.cancelRental(rentalId);
         if (result.affectedRows === 0) {
             return res.status(400).json({ error: "Rental is already cancelled or cannot be found" });
         }
-        res.json({ message: "Rental cancelled successfully" });
+        try {
+            await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
+            res.json({ message: "Rental cancelled successfully", cashback: cashback });
+        }catch (err){
+            res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
+        }
     } catch (error) {
         if (debug )  console.error("Error rentalController/cancelRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 exports.extendRental = async (req, res) => {
     try {
         const rentalId = parseInt(req.params.rentalId, 10);
@@ -127,10 +184,7 @@ exports.extendRental = async (req, res) => {
             return res.status(400).json({ error: "Invalid date format for end_date" });
         }
     //process
-        const [rental] = await db.query(
-            `SELECT end_date, status FROM rentals WHERE id = ?`,
-            [rentalId]
-        );
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
             return res.status(404).json({ error: "Rental not found" });
         }
@@ -141,10 +195,7 @@ exports.extendRental = async (req, res) => {
         if (newEndDate <= new Date(currentRental.end_date)) {
             return res.status(400).json({ error: "New end date must be after the current end date" });
         }
-        const result = await db.query(
-            `UPDATE rentals SET end_date = ? WHERE id = ? AND status = 'pending'`,
-            [newEndDate, rentalId]
-        );
+        const result = await rentalModel.extendRental(rentalId,newEndDate)
         if (result.affectedRows === 0) {
             return res.status(500).json({ error: "Unable to extend rental" });
         }
@@ -157,23 +208,14 @@ exports.extendRental = async (req, res) => {
 
 exports.viewRentalHistory = async (req, res) => {
     try {
-        //const userId = req.user && req.user.id;
-        const {userId} = req.body;
+        const { userId } = req.body;
         const { status } = req.query;
     //check
         if (!userId) {
-            return res.status(401).json({ error: "Unauthorized: User ID not found" });
-        }
-        let query = `SELECT id, start_date, end_date, status, total_price, created_at 
-                     FROM rentals WHERE user_id = ?`;
-
-        const params = [userId];
-        if (status) { // for filttering (if u want al history all status based history )
-            query += ` AND status = ?`;
-            params.push(status);
+            return res.status(401).json({ error: "User ID not found" });
         }
     //process
-        const [rentalHistory] = await db.query(query, params);
+        const [rentalHistory] = await rentalModel.getUserRentalHistory(userId, status);
         if (rentalHistory.length === 0) {
             return res.status(404).json({ message: "No rental history found" });
         }
@@ -191,11 +233,7 @@ exports.viewRentalDetails = async (req, res) => {
             return res.status(400).json({ error: "Invalid rental ID" });
         }
     //process
-        const [rental] = await db.query(
-            `SELECT id, user_id, item_id, start_date, end_date, quantity, status, total_price, insurance_fee, platform_fee, created_at 
-             FROM rentals WHERE id = ?`,
-            [rentalId]
-        );
+        const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
             return res.status(404).json({ error: "Rental not found" });
         }
@@ -209,10 +247,10 @@ exports.viewRentalDetails = async (req, res) => {
 
 exports.viewAllRentals = async (req, res) => {
     try {
-        if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).json({ error: "Access denied admins only allowed" });
-        }
-        const [allRentals] = await db.query(`SELECT * FROM rentals`);
+        // if (!req.user || req.user.role !== 'admin') {
+        //     return res.status(403).json({ error: "Access denied admins only allowed" });
+        // }
+        const [allRentals] = await rentalModel.getAllRentals;
         if (allRentals.length === 0) {
             return res.status(404).json({ error: "No rentals found" });
         }

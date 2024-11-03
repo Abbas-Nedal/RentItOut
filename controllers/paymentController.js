@@ -12,6 +12,7 @@
 * */
 const debug = true;
 const db = require('../database');
+const paymentModel = require('../models/paymentModel');
 
 // TODO: replace all "All required fields must be provided" to const
 // TODO: make sth to handle the amount and total amount
@@ -23,17 +24,14 @@ exports.initializePayment = async (req, res) => {
         if (!rentalId || !amount || !paymentMethod ) {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
-        const [rental] = await db.query(`SELECT * FROM rentals WHERE id = ? AND status = 'pending'`, [rentalId]);
+        const rental = await paymentModel.getPendingRentalById(rentalId);
         if (!rental) {
             return res.status(404).json({ error: "Rental not found or completed" });
         }
     //process
        // TODO: Handle meny PaymentsForRental logic
-        const result = await db.query(
-            `INSERT INTO payment_transactions (rental_id, amount, payment_date, payment_method, status) VALUES (?, ?, NOW(), ?, 'pending')`,
-            [rentalId, amount, paymentMethod]
-        );
-        res.status(201).json({ message: "Payment initialized", paymentId: result.insertId });
+        const paymentId = await paymentModel.insertPaymentTransaction(rentalId, amount, paymentMethod);
+        res.status(201).json({ message: "Payment initialized", paymentId: paymentId });
     } catch (error) {
         if (debug) console.error("Error in paymentController/initializePayment:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -46,10 +44,7 @@ exports.processPayment = async (req, res) => { //TODO: consider payment type in 
         if (!rentalId || !paymentId ) {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
-        const [payment] = await db.query(
-            `SELECT * FROM payment_transactions WHERE id = ? AND rental_id = ? AND status = 'pending'`,
-            [paymentId, rentalId]
-        );
+        const payment = await paymentModel.getPendingPaymentById(paymentId, rentalId);
         if (!payment) {
             return res.status(404).json({ error: "Payment not found or processed" });
         }
@@ -58,14 +53,8 @@ exports.processPayment = async (req, res) => { //TODO: consider payment type in 
         // firstly, it may ambigous, but acttuly i supposed if there a real pay so here we should call real paymnet
         // like PayPal, Visa ....., so it may be failed if no money
         if (paymentSuccess) {
-            await db.query(
-                `UPDATE payment_transactions SET status = 'paid' WHERE id = ?`,
-                [paymentId]
-            );
-            await db.query(
-                `UPDATE rentals SET status = 'completed' WHERE id = ?`,
-                [rentalId]
-            );
+            await paymentModel.updatePaymentStatus(paymentId, 'paid');
+            await paymentModel.updateRentalStatus(rentalId,'true');
             res.json({ message: "Payment processed successfully" });
         } else {
             res.status(400).json({ error: "Payment failed" });
@@ -82,15 +71,12 @@ exports.processRefund = async (req, res) => {
         if (!rentalId || !paymentId ) {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
-        const [rental] = await db.query(`SELECT * FROM rentals WHERE id = ? AND status = 'cancelled'`, [rentalId]);
+        const rental = await paymentModel.getCancelledRentalById(rentalId);
         if (!rental) {
-            return res.status(404).json({ error: "Rental not eligible for refund" });
+            return res.status(404).json({ error: "Rental not found for refund" });
         }
     //process
-        const result = await db.query(
-            `UPDATE payment_transactions SET status = 'refunded' WHERE id = ? AND rental_id = ? AND status = 'paid'`,
-            [paymentId, rentalId]
-        );
+        const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId);
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Payment not found or already refunded" });
         }
@@ -108,19 +94,16 @@ exports.viewAllPaymentForUsers = async (req, res) => {
         }
         //process
         // TODO: Handle meny PaymentsForRental logic
-        //const allPayments = await db.query(`SELECT * FROM payment_transactions WHERE `);
+        const allPayments = await paymentModel.getAllPaymentsForUser(userID);
         if (allPayments.length === 0) {
             return res.status(404).json({ error: "No payments found" });
         }
-
         res.json({ payments: allPayments });
     } catch (error) {
         if (debug) console.error("Error payment/allPayments:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-
 };
-
 exports.viewPaymentDetails = async (req, res) => {
     try {
         const { rentalId, paymentId } = req.params;
@@ -129,10 +112,7 @@ exports.viewPaymentDetails = async (req, res) => {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
     //process
-        const [payment] = await db.query(
-            `SELECT * FROM payment_transactions WHERE rental_id = ? AND id = ?`,
-            [rentalId, paymentId]
-        );
+        const payment = await paymentModel.getPaymentDetailsById(rentalId, paymentId);
         if (!payment) {
             return res.status(404).json({ error: "Payment not found" });
         }
@@ -142,46 +122,40 @@ exports.viewPaymentDetails = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
-
-exports.viewAllPaymentsForRental = async (req, res) => {
-    try {
-        const { rentalId } = req.params;
-    // validate
-        if (!rentalId  ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
-    //process
-        const payments = await db.query(
-            `SELECT * FROM payment_transactions WHERE rental_id = ?`,
-            [rentalId]
-        );
-
-        if (payments.length === 0) {
-            return res.status(404).json({ error: "No payments found for this rental" });
-        }
-
-        res.json({ payments });
-    } catch (error) {
-        if (debug) console.error("Error paymentController/viewAllPaymentsForRental:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-
-};
-exports.viewAllPayments = async (req, res) => { //TODO : Admin valdiation
+exports.viewAllPayments = async (req, res) => { //TODO : Admin validation
     try {
     // validate
         if (!rentalId  ) {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
     //process
-        const allPayments = await db.query(`SELECT * FROM payment_transactions`);
+        const allPayments = await paymentModel.getAllPayments();
         if (allPayments.length === 0) {
             return res.status(404).json({ error: "No payments found" });
         }
-
         res.json({ payments: allPayments });
     } catch (error) {
-        if (debug) console.error("Error payment/allPayments:", error);
+        if (debug) console.error("Error payment/allPayments: ", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+// exports.viewAllPaymentsForRental = async (req, res) => {
+//     try {
+//         const { rentalId } = req.params;
+//         // validate
+//         if (!rentalId  ) {
+//             return res.status(400).json({ error: "All required fields must be provided" });
+//         }
+//         //process
+//         const payments = await paymentModel.getAllPaymentsForRental(rentalId);
+//         if (payments.length === 0) {
+//             return res.status(404).json({ error: "No payments found for this rental" });
+//         }
+//         res.json({ payments });
+//     } catch (error) {
+//         if (debug) console.error("Error paymentController/viewAllPaymentsForRental:", error);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+//
+// };
