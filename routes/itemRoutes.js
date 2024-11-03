@@ -11,7 +11,7 @@ router.get('/:item_id', itemController.getItemById);
 router.get('/', itemController.getAllItems);
 router.get('/category/:category', itemController.getItemsByCategory);
 router.get('/user/:user_id', itemController.getItemsByUserId);
-
+router.get('/available', itemController.getAvailableItems);
 module.exports = router;
 
 /*

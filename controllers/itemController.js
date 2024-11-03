@@ -158,3 +158,20 @@ exports.getItemsByUserId = async (req, res) => {
     }
 };
 
+// get available items
+exports.getAvailableItems = async (req, res) => {
+    try {
+        const [items] = await db.query(`SELECT * FROM items WHERE available = 1`);
+
+        if (items.length === 0) {
+            logger.warn(`No available items found`);
+            return res.status(404).json({ error: 'No available items found.' });
+        }
+        res.status(200).json(items);
+    } catch (err) {
+        logger.error(`Failed to fetch available items: ${err.message}`);
+        res.status(500).json({ error: 'Failed to fetch available items.' });
+    }
+};
+
+
