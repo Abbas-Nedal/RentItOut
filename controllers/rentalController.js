@@ -16,45 +16,43 @@
 *   status
 *   total_price
 *   user_id
+*   paid --> exist in payment
 * */
-const db = require('../database');
 const rentalModel = require("../models/rentalModel");
 const paymentModel = require("../models/paymentModel");
 
-const {initializePayment, processRefund} = require("./paymentController");
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
 const cashback_percentage = 0.5
 //TODO: in completeRental u should handle notification and detremine who called this method?????
 
-
-exports.createRental = async (req, res) => { //TODO:Handle multibile creations
+exports.createRental = async (req, res) => {
     try {
         const {
             user_id,
             item_id,
             quantity,
             start_date,
-            end_date
+            end_date,
+            paymentMethod,
+            currency
         } = req.body;
     //check
-        if (!user_id || !item_id || !quantity || !start_date || !end_date) {
-            return res.status(400).json({ error: "All required fields must be provided" });
+        if (!user_id || !item_id || !quantity || !start_date || !end_date ||!paymentMethod||!currency) {
+            return res.status(400).json({ error: "All required fields must be provided to createRental" });
         }
-    //process
-        const [itemPricePerDay] = await db.query(
-            `SELECT price_per_day, available_quantity FROM items WHERE id = ?`, [item_id]
-        );
-        if (!itemPricePerDay || itemPricePerDay.length === 0) {
+        const [item] = await rentalModel.fetchItem(item_id);
+        if (!item || item.length === 0) {
             return res.status(404).json({ error: "Item not found" });
         }
-        const dailyPrice = parseFloat(itemPricePerDay[0].price_per_day);
-        const availableQuantity = itemDetails[0].available_quantity;
+        const availableQuantity = item.available_quantity;
         if (quantity > availableQuantity) {
             return res.status(400).json({ error: "available quantity less than requested for the requested item" });
         }
 
+    //process
+        const dailyPrice = parseFloat(item.price_per_day);
         const rentalDays = (new Date(end_date) - new Date(start_date)) / (1000 * 60 * 60 * 24);
         const totalItemPrice = dailyPrice * quantity * rentalDays;
         const insurance_fee= insurance_fee_percentage* totalItemPrice
@@ -62,33 +60,27 @@ exports.createRental = async (req, res) => { //TODO:Handle multibile creations
         const total_price = totalItemPrice + (insurance_fee || 0) + (platform_fee || 0);
         const rentalData ={user_id, item_id, quantity, start_date, end_date, insurance_fee, platform_fee, total_price}
 
-        const newRental = await rentalModel.createRental(rentalData);
+        const newRentalID = await rentalModel.createRental(rentalData);
+        if (!newRentalID) {
+            return res.status(404).json({ error: "Failed to create Rental" });
+        }
         try {
             await rentalModel.decreaseAvailableQuantity(item_id, quantity)
-
-            const paymentData = { rentalId: newRental.insertId, amount: total_price };
-            const mockReq = {
-                body: paymentData
-            };
-            const paymentResponse = await initializePayment(mockReq, res);
-            res.status(201).json({
-                message: "Rental and Payment initialized successfully",
-                rental: {
-                    id: newRental.insertId,
-                    user_id,
-                    item_id,
-                    quantity,
-                    start_date,
-                    end_date,
-                    insurance_fee,
-                    total_price,
-                    status: 'pending'
-                },
-                payment: paymentResponse
-            });
         } catch (err){
             res.status(500).json({ error: "Failed to decrease available quantity: Insufficient available quantity or item not found" });
         }
+        res.status(201).json({
+            message: "Rental initialized successfully, now you need to init payment",
+            rental: {
+                id: newRentalID, quantity, start_date, end_date, insurance_fee, total_price, status: 'pending'
+            },
+            redirectTo: `POST /api/v1/rentals/${newRentalID}/pay`,
+            body:{
+                amount:total_price,
+                paymentMethod,
+                currency
+            }
+        });
     } catch (error) {
         if (debug )console.error("Error rentalController/creatRental:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -161,7 +153,11 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         }
         try {
             await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
-            res.json({ message: "Rental cancelled successfully", cashback: cashback });
+            res.json({
+                message: "Rental cancelled successfully",
+                cashback: cashback,
+                redirectTo: `PUT /api/v1/rentals/${rentalId}/payments/${result}/refund`
+            });
         }catch (err){
             res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
         }
