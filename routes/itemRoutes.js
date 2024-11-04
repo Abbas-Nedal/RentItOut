@@ -3,7 +3,7 @@
 const express = require('express');
 const router= express.Router();
 const itemController = require('../controllers/itemController');
-
+router.get('/search', itemController.searchItemsByNameOrDescription);
 router.post('/', itemController.createitem);
 router.put('/:item_id', itemController.updateItem);
 router.delete('/:item_id', itemController.deleteItem);
@@ -22,4 +22,5 @@ to test , use routes:
   GET http://localhost:3000/item/item_id
   GET http://localhost:3000/item/
   GET http://localhost:3000/item/category/categoryname
+  GET http://localhost:3000/item/search?query=Rental
 */

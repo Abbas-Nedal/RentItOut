@@ -173,5 +173,28 @@ exports.getAvailableItems = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch available items.' });
     }
 };
+// get item by name or description
+exports.searchItemsByNameOrDescription = async (req, res) => {
+    try {
+        const query = req.query.query ? req.query.query.trim() : '';
 
+        console.log("Query parameter received:", query);
 
+        const [items] = await db.query(
+            `SELECT * FROM items WHERE name LIKE ? OR description LIKE ?`,
+            [`%${query}%`, `%${query}%`]
+        );
+
+        console.log("Database query results:", items);
+
+        if (!items || items.length === 0) {
+            console.warn(`No items found matching the query "${query}"`);
+            return res.status(404).json({ error: `No items found matching the query "${query}".`, query });
+        }
+
+        res.status(200).json(items);
+    } catch (err) {
+        console.error(`Failed to search items: ${err.message}`);
+        res.status(500).json({ error: 'Failed to search items.', message: err.message });
+    }
+};
