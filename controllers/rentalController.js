@@ -27,6 +27,25 @@ const insurance_fee_percentage  = 0.05
 const cashback_percentage = 0.5
 //TODO: in completeRental u should handle notification and detremine who called this method?????
 
+const ERROR_MESSAGES = {
+    REQUIRED_FIELDS: "All required fields must be provided",
+    INVALID_RENTAL_ID: "Invalid rental ID",
+    RENTAL_NOT_FOUND: "Rental not found",
+    ITEM_NOT_FOUND: "Item not found",
+    INVALID_DATE: "Invalid date format for end_date",
+    QUANTITY_ERROR: "Requested quantity exceeds available quantity",
+    CREATE_RENTAL_FAILED: "Failed to create rental",
+    UPDATE_QUANTITY_FAILED: "Failed to update available quantity",
+    RENTAL_ALREADY_COMPLETED: "Cannot cancel completed rental",
+    INVALID_EXTEND_DATE: "New end date must be after the current end date",
+    NO_RENTAL_HISTORY: "No rental history found",
+    NO_RENTALS_FOUND: "No rentals found",
+    ACCESS_DENIED: "Access denied: admins only"
+};
+const handleError = (res, statusCode, message) => {
+    if (debug) console.error(message);
+    res.status(statusCode).json({ error: message });
+};
 exports.createRental = async (req, res) => {
     try {
         const {
@@ -40,15 +59,15 @@ exports.createRental = async (req, res) => {
         } = req.body;
     //check
         if (!user_id || !item_id || !quantity || !start_date || !end_date ||!paymentMethod||!currency) {
-            return res.status(400).json({ error: "All required fields must be provided to createRental" });
+            return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
         }
         const [item] = await rentalModel.fetchItem(item_id);
         if (!item || item.length === 0) {
-            return res.status(404).json({ error: "Item not found" });
+            return handleError(res, 404, ERROR_MESSAGES.ITEM_NOT_FOUND);
         }
         const availableQuantity = item.available_quantity;
         if (quantity > availableQuantity) {
-            return res.status(400).json({ error: "available quantity less than requested for the requested item" });
+            return handleError(res, 400, ERROR_MESSAGES.QUANTITY_ERROR);
         }
 
     //process
@@ -62,11 +81,13 @@ exports.createRental = async (req, res) => {
 
         const newRentalID = await rentalModel.createRental(rentalData);
         if (!newRentalID) {
-            return res.status(404).json({ error: "Failed to create Rental" });
+            return handleError(res, 404, ERROR_MESSAGES.CREATE_RENTAL_FAILED);
         }
         try {
             await rentalModel.decreaseAvailableQuantity(item_id, quantity)
         } catch (err){
+            handleError(res, 500, "Failed to decrease available quantity: Insufficient available quantity or item not found");
+
             res.status(500).json({ error: "Failed to decrease available quantity: Insufficient available quantity or item not found" });
         }
         res.status(201).json({
@@ -83,7 +104,7 @@ exports.createRental = async (req, res) => {
         });
     } catch (error) {
         if (debug )console.error("Error rentalController/creatRental:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error in rentalController/createRental: ${error.message}` : ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -92,16 +113,16 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
         const rentalId = parseInt(req.params.rentalId, 10);
     //check
         if (isNaN(rentalId)) {
-            return res.status(400).json({ error: "Invalid rental ID" });
+            return handleError(res, 400, ERROR_MESSAGES.INVALID_RENTAL_ID);
         }
     //process
         const [result] = await rentalModel.cancelRental(rentalId)
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "Rental not found or already completed" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
         const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (!rental) {
-            return res.status(404).json({ error: "Rental not found" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
         if (rental.paid !== 1) {
             return res.status(404).json({ error: "Rental not paid yet" });
@@ -110,11 +131,11 @@ exports.completeRental = async (req, res) => { //TODO : in payment, this done im
             await rentalModel.increaseAvailableQuantity(rental.item_id, rental.quantity)
             res.json({ message: "Rental completed successfully" });
         }catch (err){
-            res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
+            handleError(res, 500, "Failed to increase available quantity: Insufficient available quantity or item not found");
         }
     } catch (error) {
         if (debug ) console.error("Error rentalController/completRental:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error in rentalController/completeRental: ${error.message}` : ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -123,13 +144,13 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
         const { rentalId } = req.params;
     //check
         if (isNaN(rentalId)) {
-            return res.status(400).json({ error: "Invalid rental ID" });
+            return handleError(res, 400, ERROR_MESSAGES.INVALID_RENTAL_ID);
         }
         const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
-            return res.status(404).json({ error: "Rental not found" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }if (rental[0].status === 'completed') {
-            return res.status(400).json({ error: "Cannot cancel completed rental" });
+            return handleError(res, 400, ERROR_MESSAGES.RENTAL_ALREADY_COMPLETED);
         }
         const cashback = rental[0].amount_paid * cashback_percentage
 
@@ -149,7 +170,7 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
     //process
         const result = await rentalModel.cancelRental(rentalId);
         if (result.affectedRows === 0) {
-            return res.status(400).json({ error: "Rental is already cancelled or cannot be found" });
+            return handleError(res, 400, ERROR_MESSAGES.RENTAL_ALREADY_CANCELLED);
         }
         try {
             await rentalModel.increaseAvailableQuantity(rental[0].item_id, rental[0].quantity)
@@ -159,11 +180,11 @@ exports.cancelRental = async (req, res) => {//TODO: nest the cancling to payment
                 redirectTo: `PUT /api/v1/rentals/${rentalId}/payments/${result}/refund`
             });
         }catch (err){
-            res.status(500).json({ error: "Failed to increase available quantity: Insufficient available quantity or item not found" });
+            handleError(res, 500, ERROR_MESSAGES.INSUFFICIENT_QUANTITY);
         }
     } catch (error) {
         if (debug )  console.error("Error rentalController/cancelRental:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error rentalController/cancelRental: ${error.message}` : "Internal Server Error");
     }
 };
 
@@ -173,32 +194,32 @@ exports.extendRental = async (req, res) => {
         const { end_date } = req.body;
     //check
         if (isNaN(rentalId) || !end_date) {
-            return res.status(400).json({ error: "Invalid rental ID or New end date " });
+            return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
         }
         const newEndDate = new Date(end_date);
         if (isNaN(newEndDate.getTime())) {
-            return res.status(400).json({ error: "Invalid date format for end_date" });
+            return handleError(res, 400, ERROR_MESSAGES.INVALID_EXTEND_DATE);
         }
     //process
         const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
-            return res.status(404).json({ error: "Rental not found" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
         const currentRental = rental[0];
         if (currentRental.status !== 'pending') {
-            return res.status(400).json({ error: "Only pending rentals can be extended" });
+            return handleError(res, 400, ERROR_MESSAGES.RENTAL_ALREADY_COMPLETED);
         }
         if (newEndDate <= new Date(currentRental.end_date)) {
-            return res.status(400).json({ error: "New end date must be after the current end date" });
+            return handleError(res, 400, ERROR_MESSAGES.INVALID_EXTEND_DATE);
         }
         const result = await rentalModel.extendRental(rentalId,newEndDate)
         if (result.affectedRows === 0) {
-            return res.status(500).json({ error: "Unable to extend rental" });
+            return handleError(res, 500, "Unable to extend rental");
         }
         res.json({ message: "Rental extended", new_end_date: newEndDate });
     } catch (error) {
         if (debug)  console.error("Error rentalController/extendRental:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error rentalController/extendRental: ${error.message}` : "Internal Server Error");
     }
 };
 
@@ -208,17 +229,17 @@ exports.viewRentalHistory = async (req, res) => {
         const { status } = req.query;
     //check
         if (!userId) {
-            return res.status(401).json({ error: "User ID not found" });
+            return handleError(res, 401, ERROR_MESSAGES.ACCESS_DENIED);
         }
     //process
         const [rentalHistory] = await rentalModel.getUserRentalHistory(userId, status);
         if (rentalHistory.length === 0) {
-            return res.status(404).json({ message: "No rental history found" });
+            return handleError(res, 404, ERROR_MESSAGES.NO_RENTAL_HISTORY);
         }
         res.json({ rentals: rentalHistory });
     } catch (error) {
         if (debug ) console.error("Error viewing rental history:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error viewing rental history: ${error.message}` : "Internal Server Error");
     }
 };
 exports.viewRentalDetails = async (req, res) => {
@@ -226,17 +247,17 @@ exports.viewRentalDetails = async (req, res) => {
         const rentalId = parseInt(req.params.rentalId, 10);
     //check
         if (isNaN(rentalId)) {
-            return res.status(400).json({ error: "Invalid rental ID" });
+            return handleError(res, 400, ERROR_MESSAGES.INVALID_RENTAL_ID);
         }
     //process
         const [rental] = await rentalModel.getRentalDetails(rentalId);
         if (rental.length === 0) {
-            return res.status(404).json({ error: "Rental not found" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
         res.json({ rental: rental[0] });
     } catch (error) {
         if (debug )   console.error("Error viewing rental details:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error viewing rental details: ${error.message}` : "Internal Server Error");
     }
 };
 
@@ -248,11 +269,11 @@ exports.viewAllRentals = async (req, res) => {
         // }
         const [allRentals] = await rentalModel.getAllRentals;
         if (allRentals.length === 0) {
-            return res.status(404).json({ error: "No rentals found" });
+            return handleError(res, 404, ERROR_MESSAGES.NO_RENTALS_FOUND);
         }
         res.json({ rentals: allRentals });
     } catch (error) {
         if (debug ) console.error("Error viewing all rentals:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        handleError(res, 500, debug ? `Error viewing all rentals: ${error.message}` : "Internal Server Error");
     }
 };
