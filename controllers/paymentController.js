@@ -11,42 +11,74 @@
 *   status
 * */
 const debug = true;
-const db = require('../database');
 const paymentModel = require('../models/paymentModel');
-
-// TODO: replace all "All required fields must be provided" to const
-// TODO: make sth to handle the amount and total amount
+const { convertCurrency } = require('../services/currencyService');
+const cashback_percentage = 0.5
+const ERROR_MESSAGES = {
+    REQUIRED_FIELDS: "All required fields must be provided",
+    RENTAL_NOT_FOUND: "Rental not found or completed",
+    PAYMENT_NOT_FOUND: "Payment not found or processed",
+    PAYMENT_FAILED: "Payment failed",
+    NO_PAYMENTS_FOUND: "No payments found",
+    INTERNAL_SERVER_ERROR: "Internal server error"
+};
+const handleError = (res, statusCode, message) => {
+    if (debug) console.error(message);
+    res.status(statusCode).json({ error: message });
+};
 exports.initializePayment = async (req, res) => {
-    try {
-        const { rentalId } = req.params;
-        const { amount, paymentMethod } = req.body;
+    const { rentalId } = req.params;
+    const { amount, paymentMethod , currency } = req.body;
+
     //validate
-        if (!rentalId || !amount || !paymentMethod ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
+    if (!rentalId || !amount || !paymentMethod ||!currency ) {
+        return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
+    }
+    try {
         const rental = await paymentModel.getPendingRentalById(rentalId);
         if (!rental) {
-            return res.status(404).json({ error: "Rental not found or completed" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
+        }
+    //External API
+        const amountUSD = await convertCurrency(currency,"USD",amount)
+        console.log(amountUSD)
+        if (!amountUSD) {
+            return handleError(res, 404,"Currency conversion failed");
         }
     //process
-       // TODO: Handle meny PaymentsForRental logic
-        const paymentId = await paymentModel.insertPaymentTransaction(rentalId, amount, paymentMethod);
-        res.status(201).json({ message: "Payment initialized", paymentId: paymentId });
+        const paymentId = await paymentModel.insertPaymentTransaction(rentalId, amountUSD, paymentMethod);
+        res.status(201).json({
+            message: "Payment initialized",
+            paymentId: paymentId,
+            redirectTo:`PUT /api/v1/rentals/${rentalId}/payments/${paymentId}/process/`,
+            body: {amount:amount, currency:currency}
+        });
     } catch (error) {
-        if (debug) console.error("Error in paymentController/initializePayment:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (debug) console.error("Error in paymentController/initializePayment: ", error,"\n", error.message);
+        handleError(res, 500,
+            debug ? "Error in paymentController/initializePayment: "+error.message
+                           : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        );
     }
 };
-exports.processPayment = async (req, res) => { //TODO: consider payment type in processing
-    try {
-        const { rentalId, paymentId } = req.params;
+exports.processPayment = async (req, res) => {
+    const { rentalId, paymentId } = req.params;
+    const { amount, currency } = req.body;
+
     //validate
-        if (!rentalId || !paymentId ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
+    if (!rentalId || !paymentId ||!currency ) {
+        return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
+    }
+    try {
+        const rental = await paymentModel.getPendingRentalById(rentalId);
+        if (!rental) {
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
+        }if (amount < rental.total_price || amount > rental.total_price) {
+            return handleError(res, 400, `Invalid payment amount. Required: ${rental.total_price}`);
         }
         const payment = await paymentModel.getPendingPaymentById(paymentId, rentalId);
         if (!payment) {
-            return res.status(404).json({ error: "Payment not found or processed" });
+            return handleError(res, 404, ERROR_MESSAGES.PAYMENT_NOT_FOUND);
         }
     //process
         const paymentSuccess = true;
@@ -54,89 +86,118 @@ exports.processPayment = async (req, res) => { //TODO: consider payment type in 
         // like PayPal, Visa ....., so it may be failed if no money
         if (paymentSuccess) {
             await paymentModel.updatePaymentStatus(paymentId, 'paid');
-            await paymentModel.updateRentalStatus(rentalId,'true');
+            await paymentModel.updateRentalStatus(rentalId,'paid');
             res.json({ message: "Payment processed successfully" });
         } else {
-            res.status(400).json({ error: "Payment failed" });
+            handleError(res, 400, ERROR_MESSAGES.PAYMENT_FAILED);
         }
     } catch (error) {
-        if (debug)  console.error("Error  in paymentController/processPayment:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (debug)  console.error("Error in paymentController/processPayment:", error,"\n", error.message);
+        handleError(res, 500,
+            debug ? "Error in paymentController/processPayment: " +error.message
+                : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        );
     }
 };
 exports.processRefund = async (req, res) => {
-    try {
-        const { rentalId, paymentId } = req.params;
+    const { rentalId, paymentId } = req.params;
+const {status}= req.body;
     // validate
-        if (!rentalId || !paymentId ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
+    if (!rentalId || !paymentId  ||!status) {
+        return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
+    }
+    try {
         const rental = await paymentModel.getCancelledRentalById(rentalId);
         if (!rental) {
-            return res.status(404).json({ error: "Rental not found for refund" });
+            return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
-    //process
-        const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId);
+
+        let cashback = 0;
+
+        if (status === "pending") {
+            cashback = 0;
+        } else if (status === "paid") {
+            cashback = rental[0].total_price * cashback_percentage;
+        }
+
+        //process
+        const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId,cashback);
+        console.log(paymentId, rentalId,cashback)
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "Payment not found or already refunded" });
+            return handleError(res, 404, "Payment not found or already refunded");
         }
+       // const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId);
+
         res.json({ message: "Refund processed successfully" });
     } catch (error) {
-        if (debug)  console.error("Error in paymentController/processRefund:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (debug)  console.error("Error in paymentController/processRefund:", error, "\n",error.message);
+        handleError(res, 500,
+            debug ? "Error in paymentController/processRefund:" + error.message
+                : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        );
     }
 };
 exports.viewAllPaymentForUsers = async (req, res) => {
+    const { userId } = req.params;
+
+    // validate
+    if (!userId ) {
+        return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
+    }
+    //process
     try {
-        // validate
-        if (!rentalId || !userID ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
-        //process
-        // TODO: Handle meny PaymentsForRental logic
-        const allPayments = await paymentModel.getAllPaymentsForUser(userID);
+        const allPayments = await paymentModel.getAllPaymentsForUser(userId);
         if (allPayments.length === 0) {
-            return res.status(404).json({ error: "No payments found" });
+            return handleError(res, 404, ERROR_MESSAGES.NO_PAYMENTS_FOUND);
         }
         res.json({ payments: allPayments });
     } catch (error) {
-        if (debug) console.error("Error payment/allPayments:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (debug) console.error("Error payment/allPayments:", error,"\n", error.message);
+        handleError(res, 500,
+            debug ? "Error in paymentController/viewAllPaymentForUsers: " + error.message
+                : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        );
     }
 };
 exports.viewPaymentDetails = async (req, res) => {
-    try {
-        const { rentalId, paymentId } = req.params;
+    const { rentalId } = req.params;
+
     // validate
-        if (!rentalId || !paymentId ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
+    if (!rentalId  ) {
+        return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
+    }
+
     //process
-        const payment = await paymentModel.getPaymentDetailsById(rentalId, paymentId);
+    try {
+        const payment = await paymentModel.getPaymentDetailsById(rentalId);
         if (!payment) {
-            return res.status(404).json({ error: "Payment not found" });
+            return handleError(res, 404, ERROR_MESSAGES.PAYMENT_NOT_FOUND);
         }
         res.json({ payment });
     } catch (error) {
-        if (debug) console.error("Error in paymentController/viewingPaymentDetails:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (debug) console.error("Error in paymentController/viewingPaymentDetails:", error,"\n", error.message);
+        handleError(res, 500,
+            debug ? "Error in paymentController/viewPaymentDetails: " + error.message
+                : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        );
     }
 };
-exports.viewAllPayments = async (req, res) => { //TODO : Admin validation
-    try {
-    // validate
-        if (!rentalId  ) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
+exports.viewAllPayments = async (req, res) => {
+    // TODO: Admin validation needed
+
     //process
+    try {
         const allPayments = await paymentModel.getAllPayments();
         if (allPayments.length === 0) {
-            return res.status(404).json({ error: "No payments found" });
+            return handleError(res, 404, ERROR_MESSAGES.NO_PAYMENTS_FOUND);
         }
         res.json({ payments: allPayments });
     } catch (error) {
-        if (debug) console.error("Error payment/allPayments: ", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (debug) console.error("Error payment/allPayments: ", error, "\n",  error.message);
+        handleError(res, 500,
+            debug ? "Error in paymentController/viewAllPayments: " + error.message
+                : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        );
     }
 };
 

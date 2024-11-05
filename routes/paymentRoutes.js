@@ -3,12 +3,10 @@ const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 
 router.post('/:rentalId/pay', paymentController.initializePayment);
-router.post('/:rentalId/payments/:paymentId/process', paymentController.processPayment);
-router.post('/:rentalId/payments/:paymentId/refund', paymentController.processRefund);
-
-router.get('/:rentalId/payments/:paymentId', paymentController.viewPaymentDetails);
-// router.get('/:rentalId/payments', paymentController.viewAllPaymentsForRental);
+router.put('/:rentalId/payments/:paymentId/process', paymentController.processPayment);
+router.put('/:rentalId/payments/:paymentId/refund', paymentController.processRefund);
+router.get('/:rentalId/payments', paymentController.viewPaymentDetails);
 router.get('/admin/payments', paymentController.viewAllPayments);
 router.get('/user/:userId/payments', paymentController.viewAllPaymentForUsers);
-
+// router.get('/:rentalId/payments', paymentController.viewAllPaymentsForRental);
 module.exports = router;

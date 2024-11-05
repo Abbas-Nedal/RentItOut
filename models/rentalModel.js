@@ -41,9 +41,10 @@ exports.decreaseAvailableQuantity = async (itemId, decrementAmount) => {
 exports.increaseAvailableQuantity = async (itemId, incrementAmount) => {
     try {
         const [result] = await db.query(
-            `UPDATE items SET available_quantity = available_quantity + ? WHERE id = ? AND available_quantity >= ?`,
-            [incrementAmount, itemId, incrementAmount]
+            `UPDATE items SET available_quantity = available_quantity + ? WHERE id = ? `,
+            [incrementAmount, itemId]
         );
+        console.error("result ",result);
 
         if (result.affectedRows === 0) {
             throw new Error("Insufficient available quantity or item not found");
@@ -55,17 +56,15 @@ exports.increaseAvailableQuantity = async (itemId, incrementAmount) => {
         throw new Error("Failed to increase available quantity");
     }
 };
-
 exports.completeRental = async (rentalId) => {
     const query = `
         UPDATE rentals
         SET status = 'completed', completed_at = NOW()
-        WHERE id = ? AND status = 'pending';
+        WHERE id = ? ;
     `;
     const [result] = await db.query(query, [rentalId]);
-    return result.affectedRows;
+    return result;
 };
-
 exports.cancelRental = async (rentalId) => {
     const query = `
         UPDATE rentals
@@ -75,19 +74,23 @@ exports.cancelRental = async (rentalId) => {
     const [result] = await db.query(query, [rentalId]);
     return result.affectedRows;
 };
-
 exports.extendRental = async (rentalId, newEndDate) => {
     const query = `
         UPDATE rentals
         SET end_date = ?
-        WHERE id = ? AND status = 'pending' AND end_date < ?;
+        WHERE id = ? ;
     `;
-    const [result] = await db.query(query, [newEndDate, rentalId, newEndDate]);
+    const [result] = await db.query(query, [newEndDate, rentalId]);
     return result.affectedRows;
 };
 
-
-
+exports.getRentalDetails = async (rentalId) => {
+    const query = `
+        SELECT * FROM rentals WHERE id = ?;
+    `;
+    const [rows] = await db.query(query, [rentalId]);
+    return rows[0];
+};
 exports.getUserRentalHistory = async (userId, status) => {
     let query = `SELECT * FROM rentals WHERE user_id = ?`;
     const params = [userId];
@@ -98,16 +101,23 @@ exports.getUserRentalHistory = async (userId, status) => {
     const [rows] = await db.query(query, params);
     return rows;
 };
-exports.getRentalDetails = async (rentalId) => {
-    const query = `
-        SELECT * FROM rentals WHERE id = ?;
-    `;
-    const [rows] = await db.query(query, [rentalId]);
-    return rows[0];
-};
 exports.getAllRentals = async () => {
     const query = `SELECT * FROM rentals`;
     const [rows] = await db.query(query);
     return rows;
 };
 
+exports. fetchItem = async (item_id)=> {
+    const [item] = await db.query(
+        `SELECT * FROM items WHERE id = ?`,
+        [item_id]
+    );
+    return item;
+}
+exports.getPaymentDetailsById = async (rentalId, paymentId) => {
+    const [payment] = await db.query(
+        `SELECT * FROM payment_transactions WHERE rental_id = ?`,
+        [rentalId]
+    );
+    return payment[0];
+};
