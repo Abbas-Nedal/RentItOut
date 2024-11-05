@@ -16,4 +16,4 @@ const endpointsFiles = ['./server.js'];
 
 
 
-swaggerAutogen(outputFile, endpointsFiles, doc);
+

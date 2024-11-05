@@ -1,4 +1,8 @@
 require('dotenv').config();
+const swaggerAutogen = require('swagger-autogen')();
+const outputFile = './swagger-output.json';
+const endpointsFiles = ['./server.js'];
+const doc = require('./swagger')
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -11,7 +15,7 @@ const userRoutes = require('./routes/userRoutes');
 const rentalRoutes = require('./routes/rentalRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const logisticRoutes = require('./routes/logisticRoutes');
-const itemRoutes=require('./routes/itemRoutes');
+const itemRoutes = require('./routes/itemRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
@@ -31,24 +35,23 @@ db.getConnection()
     })
     .catch(err => console.error('Unable to connect to the DB:', err));
 
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-
-app.use('/users', userRoutes);
-app.use('/rentals', rentalRoutes);
-app.use('/rentals',paymentRoutes );
-app.use('/reviews', reviewRoutes);
-app.use('/logistics', logisticRoutes);
-app.use('/item',itemRoutes);
-
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/rentals', rentalRoutes);
+app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/logistics', logisticRoutes);
+app.use('/api/v1/items', itemRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to RentItOut Platform!');
 });
 
-
-const PORT = 3000;
-app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
+swaggerAutogen(outputFile, endpointsFiles, doc).then(() => {
+    const PORT = 3000;
+    app.listen(PORT, () => {
+        logger.info(`Server running on port ${PORT}`);
+        console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+    });
 });

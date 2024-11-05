@@ -7,6 +7,8 @@ router.post('/', logisticController.createLogistic);
 router.put('/:rental_id', logisticController.updateLogistic);
 router.delete('/:rental_id', logisticController.deleteLogistic);
 router.get('/:rental_id', logisticController.getLogisticsByRental);
+router.get('/', logisticController.getAllLogistics);
+
 
 module.exports = router;
 

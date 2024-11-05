@@ -47,29 +47,35 @@ exports.addReview = async (req, res) => {
 exports.updateReview = async (req, res) => {
     try {
         const { review_id } = req.params;
-        const { user_id, rating, comment } = req.body;
+        const { rating, comment } = req.body;
 
 
         const review = await db.query(
-            `SELECT * FROM reviews WHERE id = ? AND user_id = ?`,
-            [review_id, user_id]
+            `SELECT * FROM reviews WHERE id = ?`,
+            [review_id]
         );
 
+        // Check if the review exists
         if (review[0].length === 0) {
-            return res.status(404).json({ error: 'Review not found or user does not have permission.' });
+            return res.status(404).json({ error: 'Review not found.' });
         }
 
-
         await db.query(
-            `UPDATE reviews SET rating = ?, comment = ?, updated_at = NOW() WHERE id = ?`,
-            [rating || review[0][0].rating, comment || review[0][0].comment, review_id]
+            `UPDATE reviews SET
+                                rating = COALESCE(?, rating),
+                                comment = COALESCE(?, comment),
+                                created_at = NOW()
+             WHERE id = ?`,
+            [rating, comment, review_id]
         );
 
         res.status(200).json({ message: 'Review updated successfully.' });
     } catch (err) {
+        console.error(err); // Log the error for debugging
         res.status(500).json({ error: 'Failed to update review.' });
     }
 };
+
 exports.getReviewsByItem = async (req, res) => {
     try {
         const { item_id } = req.params;
