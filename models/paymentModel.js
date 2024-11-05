@@ -41,12 +41,13 @@ exports.getCancelledRentalById = async (rentalId) => {
     );
     return rental;
 };
-exports.refundPaymentTransaction = async (paymentId, rentalId) => {
-    return await db.query(
-        `UPDATE payment_transactions SET status = 'refunded' WHERE id = ? AND rental_id = ? AND status = 'paid'`,
-        [paymentId, rentalId]
+exports.refundPaymentTransaction = async (paymentId, rentalId, cashback) => {
+    return  db.query(
+        `UPDATE payment_transactions SET status = 'refunded', amount = ? WHERE id = ?`,
+        [cashback, paymentId]
     );
 };
+
 
 exports.getAllPaymentsForUser = async (userID) => {
     const [results] = await db.query(
@@ -67,7 +68,6 @@ exports.getPaymentDetailsById = async (rentalId, paymentId) => {
         `SELECT * FROM payment_transactions WHERE rental_id = ?`,
         [rentalId]
     );
-    console.log(payment)
     return payment;
 };
 // exports.getAllPaymentsForRental = async (rentalId) => {
