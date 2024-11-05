@@ -13,7 +13,7 @@
 const debug = true;
 const paymentModel = require('../models/paymentModel');
 const { convertCurrency } = require('../services/currencyService');
-
+const cashback_percentage = 0.5
 const ERROR_MESSAGES = {
     REQUIRED_FIELDS: "All required fields must be provided",
     RENTAL_NOT_FOUND: "Rental not found or completed",
@@ -101,9 +101,9 @@ exports.processPayment = async (req, res) => {
 };
 exports.processRefund = async (req, res) => {
     const { rentalId, paymentId } = req.params;
-
+const {status}= req.body;
     // validate
-    if (!rentalId || !paymentId ) {
+    if (!rentalId || !paymentId  ||!status) {
         return handleError(res, 400, ERROR_MESSAGES.REQUIRED_FIELDS);
     }
     try {
@@ -112,11 +112,22 @@ exports.processRefund = async (req, res) => {
             return handleError(res, 404, ERROR_MESSAGES.RENTAL_NOT_FOUND);
         }
 
-    //process
-        const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId);
+        let cashback = 0;
+
+        if (status === "pending") {
+            cashback = 0;
+        } else if (status === "paid") {
+            cashback = rental[0].total_price * cashback_percentage;
+        }
+
+        //process
+        const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId,cashback);
+        console.log(paymentId, rentalId,cashback)
         if (result.affectedRows === 0) {
             return handleError(res, 404, "Payment not found or already refunded");
         }
+       // const result = await paymentModel.refundPaymentTransaction(paymentId, rentalId);
+
         res.json({ message: "Refund processed successfully" });
     } catch (error) {
         if (debug)  console.error("Error in paymentController/processRefund:", error, "\n",error.message);
