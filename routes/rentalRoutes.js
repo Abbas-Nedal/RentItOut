@@ -4,7 +4,6 @@ const rentalControllers = require('../controllers/rentalController')
 
 router.post('/', rentalControllers.createRental);
 router.get('/admin', rentalControllers.viewAllRentals);
-router.get('/admin/revenews', rentalControllers.viewAllRentals);
 router.get('/user/:userId', rentalControllers.viewRentalHistory);
 router.put('/:rentalId/complete', rentalControllers.completeRental);
 router.put('/:rentalId/extend', rentalControllers.extendRental);

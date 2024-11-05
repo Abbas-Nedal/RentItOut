@@ -7,6 +7,7 @@ router.put('/:rentalId/payments/:paymentId/process', paymentController.processPa
 router.put('/:rentalId/payments/:paymentId/refund', paymentController.processRefund);
 router.get('/:rentalId/payments', paymentController.viewPaymentDetails);
 router.get('/admin/payments', paymentController.viewAllPayments);
+router.get('/admin/revenue', paymentController.viewRevenues);
 router.get('/user/:userId/payments', paymentController.viewAllPaymentForUsers);
 // router.get('/:rentalId/payments', paymentController.viewAllPaymentsForRental);
 module.exports = router;

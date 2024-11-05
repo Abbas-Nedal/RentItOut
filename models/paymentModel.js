@@ -70,6 +70,28 @@ exports.getPaymentDetailsById = async (rentalId, paymentId) => {
     );
     return payment;
 };
+// In rentalModel.js
+const db = require('./db'); // Assumes you have a database connection setup in a file like db.js
+
+exports.getRevenues = async () => {
+    const query = `
+        SELECT 
+            SUM(amount) AS total_amount
+        FROM 
+            payment_transactions
+        WHERE 
+            status IN ('paid', 'canceled')
+    `;
+
+    try {
+        const [result] = await db.query(query);
+        return result.total_amount || 0;
+    } catch (error) {
+        console.error('Error fetching revenues:', error);
+        throw error;
+    }
+};
+a
 // exports.getAllPaymentsForRental = async (rentalId) => {
 //     return await db.query(
 //         `SELECT * FROM payment_transactions WHERE rental_id = ?`,
