@@ -1,15 +1,15 @@
 require('dotenv').config();
 const swaggerAutogen = require('swagger-autogen')();
-const outputFile = './swagger-output.json';
+const outputFile = './docs/swagger-output.json';
 const endpointsFiles = ['./server.js'];
-const doc = require('./swagger')
+const doc = require('./docs/swagger')
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./database');
+const db = require('./config/database');
 const logger = require('./config/logger');
 const swaggerUi = require('swagger-ui-express');
-const swaggerFile = require('./swagger-output.json');
+const swaggerFile = require('./docs/swagger-output.json');
 
 const userRoutes = require('./routes/userRoutes');
 const rentalRoutes = require('./routes/rentalRoutes');

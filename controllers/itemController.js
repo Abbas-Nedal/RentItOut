@@ -4,7 +4,7 @@
     This is Code responsible for managing items.
  */
 
-const db = require('../database');
+const db = require('../config/database');
 const logger = require('../config/logger');
 
 // Create new item

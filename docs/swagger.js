@@ -13,7 +13,3 @@ const doc = {
 
 const outputFile = './swagger-output.json';
 const endpointsFiles = ['./server.js'];
-
-
-
-

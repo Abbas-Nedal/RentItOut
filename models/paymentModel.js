@@ -1,4 +1,4 @@
-const db = require('../database');
+const db = require('../config/database');
 
 exports.getPendingRentalById = async (rentalId) => {
     const [rental] = await db.query(
