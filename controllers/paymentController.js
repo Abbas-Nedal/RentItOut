@@ -87,7 +87,15 @@ exports.processPayment = async (req, res) => {
         if (paymentSuccess) {
             await paymentModel.updatePaymentStatus(paymentId, 'paid');
             await paymentModel.updateRentalStatus(rentalId,'paid');
-            res.json({ message: "Payment processed successfully" });
+            res.json({
+                message: "Payment processed successfully",
+                redirectTo: "POST /api/v1/logistics/",
+                body:{
+                    rentalId:rentalId,
+                    pickup_location:"location",
+                    delivery_option: "pickup"
+                }
+            });
         } else {
             handleError(res, 400, ERROR_MESSAGES.PAYMENT_FAILED);
         }
@@ -183,8 +191,6 @@ exports.viewPaymentDetails = async (req, res) => {
     }
 };
 exports.viewAllPayments = async (req, res) => {
-    // TODO: Admin validation needed
-
     //process
     try {
         const allPayments = await paymentModel.getAllPayments();
@@ -198,6 +204,18 @@ exports.viewAllPayments = async (req, res) => {
             debug ? "Error in paymentController/viewAllPayments: " + error.message
                 : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
         );
+    }
+};
+exports.viewRevenues = async (req, res) => {
+    try {
+        const Revenues = await paymentModel.getRevenues();
+        if (!Revenues || Revenues === 0) {
+            return handleError(res, 404, ERROR_MESSAGES.NO_PAYMENTS_FOUND);
+        }
+        res.json({ Revenues: Revenues });
+    } catch (error) {
+        if (debug ) console.error("Error viewing all Revenues:", error);
+        handleError(res, 500, debug ? `Error viewing all Revenues: ${error.message}` : "Internal Server Error");
     }
 };
 

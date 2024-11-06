@@ -22,8 +22,6 @@ const rentalModel = require("../models/rentalModel");
 const debug = true;
 const platform_fee_percentage  = 0.1
 const insurance_fee_percentage  = 0.05
-//TODO: in completeRental u should handle notification and detremine who called this method?????
-
 const ERROR_MESSAGES = {
     REQUIRED_FIELDS: "All required fields must be provided",
     INVALID_RENTAL_ID: "Invalid rental ID",
@@ -108,7 +106,7 @@ exports.createRental = async (req, res) => {
         handleError(res, 500, debug ? `Error in rentalController/createRental: ${error.message}` : ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
-exports.completeRental = async (req, res) => { //TODO : in payment, this done imppedely in code, so u should use this func
+exports.completeRental = async (req, res) => {
     try {
         const rentalId = parseInt(req.params.rentalId, 10);
     //check

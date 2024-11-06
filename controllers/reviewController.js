@@ -1,5 +1,5 @@
 
-const db = require('../database');
+const db = require('../config/database');
 
 /*
 From Abbas

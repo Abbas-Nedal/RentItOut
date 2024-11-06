@@ -1,4 +1,4 @@
-const db = require('../database');
+const db = require('../config/database');
 // From abbas
 
 /* This code is responsible for the delivery information.
