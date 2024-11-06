@@ -71,8 +71,6 @@ exports.getPaymentDetailsById = async (rentalId, paymentId) => {
     return payment;
 };
 // In rentalModel.js
-const db = require('./db'); // Assumes you have a database connection setup in a file like db.js
-
 exports.getRevenues = async () => {
     const query = `
         SELECT 
@@ -91,7 +89,7 @@ exports.getRevenues = async () => {
         throw error;
     }
 };
-a
+
 // exports.getAllPaymentsForRental = async (rentalId) => {
 //     return await db.query(
 //         `SELECT * FROM payment_transactions WHERE rental_id = ?`,

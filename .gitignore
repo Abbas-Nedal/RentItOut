@@ -6,5 +6,3 @@
 RentItOutDatabaseConnection.session.sql
 /.idea
 /logs-output/app.log
-docs/swagger-output.json
-/docs/swagger-output.json

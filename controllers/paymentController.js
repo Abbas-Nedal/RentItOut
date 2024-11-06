@@ -191,8 +191,6 @@ exports.viewPaymentDetails = async (req, res) => {
     }
 };
 exports.viewAllPayments = async (req, res) => {
-    // TODO: Admin validation needed
-
     //process
     try {
         const allPayments = await paymentModel.getAllPayments();

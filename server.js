@@ -39,7 +39,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/rentals', rentalRoutes);
-app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/rentals', paymentRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/logistics', logisticRoutes);
 app.use('/api/v1/items', itemRoutes);
