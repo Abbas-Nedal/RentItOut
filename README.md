@@ -11,12 +11,23 @@ RentItOut is a peer-to-peer rental platform that allows users to list and rent e
 - Automatic API documentation using Swagger
 
 ## Setup Instructions
-- Clone the repository: git clone https://github.com/Abbas-Nedal/RentItOut.git
-- Install dependencies: npm install
-- Run the app: npm start
 
-## Accessing API Documentation
-After starting the application, you can access the API documentation at: http://localhost:3000/api-docs
+1. **Clone the repository**:
+   ```
+   git clone https://github.com/Abbas-Nedal/RentItOut.git
+   ```
+2. **Install dependencies**:
+   ```
+   npm install
+   ```
+3. **Run the application**:
+   ```
+   npm start
+   ```
+4. **Access API Documentation**:
+   ```
+   See documentation: http://localhost:3000/api-docs
+   ```
 
 ## Technologies
 - **Node.js**: The runtime environment for executing JavaScript code on the server.
@@ -36,8 +47,9 @@ After starting the application, you can access the API documentation at: http://
 ## Project Structure
 
 📦 RentItOut<br>
- ┣ 📂 config               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Configuration settings<br>
+ ┣ 📂 config               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Configuration settings and database connection file<br>
  ┣ 📂 controllers          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Contains request-handling logic<br>
+ ┣ 📂 docs                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Contains Swagger configuration and documnetaion file<br>
  ┣ 📂 logs-output          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Stores logs output<br>
  ┣ 📂 middlewares          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Middleware functions for processing requests<br>
  ┣ 📂 models               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Database models, SQL query logic<br>
@@ -47,14 +59,11 @@ After starting the application, you can access the API documentation at: http://
  ┣ 📜 .dockerignore<br>
  ┣ 📜 .env<br>
  ┣ 📜 .gitignore<br>
- ┣ 📜 database.js          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Database connection and initialization<br>
  ┣ 📜 docker-compose.yml<br>
  ┣ 📜 Dockerfile<br>
  ┣ 📜 package-lock.json<br>
  ┣ 📜 package.json<br>
  ┣ 📜 README.md<br>
- ┣ 📜 server.js            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Entry point for the server<br>
- ┣ 📜 swagger-output.json<br>
- ┗ 📜 swagger.js           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Swagger configuration<br>
+ ┗ 📜 server.js            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Entry point for the server<br>
 
 
